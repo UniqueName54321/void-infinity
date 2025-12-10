@@ -1,6 +1,6 @@
 # Contributing Guidelines
 
-Thank you for showing interest in the development of osu!. We aim to provide a good collaborating environment for everyone involved, and as such have decided to list some of the most important things to keep in mind in the process. The guidelines below have been chosen based on past experience.
+Thank you for showing interest in the development of void!infinity. We aim to provide a good collaborating environment for everyone involved, and as such have decided to list some of the most important things to keep in mind in the process. The guidelines below have been chosen based on past experience.
 
 ## Table of contents
 
@@ -59,7 +59,7 @@ The [issue tracker](https://github.com/ppy/osu/issues) should provide plenty of 
 
 In the case of simple issues, a direct PR is okay. However, if you decide to work on an existing issue which doesn't seem trivial, **please ask us first**. This way we can try to estimate if it is a good fit for you and provide the correct direction on how to address it. In addition, note that while we do not rule out external contributors from working on roadmapped issues, we will generally prefer to handle them ourselves unless they're not very time sensitive.
 
-If you'd like to propose a subjective change to one of the visual aspects of the game, or there is a bigger task you'd like to work on, but there is no corresponding issue or discussion thread yet for it, **please open a discussion or issue first** to avoid wasted effort. This in particular applies if you want to work on [one of the available designs from the osu! Figma master library](https://www.figma.com/file/VIkXMYNPMtQem2RJg9k2iQ/Master-Library).
+If you'd like to propose a subjective change to one of the visual aspects of the game, or there is a bigger task you'd like to work on, but there is no corresponding issue or discussion thread yet for it, **please open a discussion or issue first** to avoid wasted effort. This in particular applies if you want to work on [one of the available designs from the void!infinity Figma master library](https://www.figma.com/file/VIkXMYNPMtQem2RJg9k2iQ/Master-Library).
 
 Aside from the above, below is a brief checklist of things to watch out when you're preparing your code changes:
 
@@ -80,13 +80,13 @@ After you're done with your changes and you wish to open the PR, please observe 
 - Please do not force-push or rebase unless we ask you to.
 - Please do not merge `master` continually if there are no conflicts to resolve. We will do this for you when the change is ready for merge.
 
-We are highly committed to quality when it comes to the osu! project. This means that contributions from less experienced community members can take multiple rounds of review to get to a mergeable state. We try our utmost best to never conflate a person with the code they authored, and to keep the discussion focused on the code at all times. Please consider our comments and requests a learning experience.
+We are highly committed to quality when it comes to the void!infinity project. This means that contributions from less experienced community members can take multiple rounds of review to get to a mergeable state. We try our utmost best to never conflate a person with the code they authored, and to keep the discussion focused on the code at all times. Please consider our comments and requests a learning experience.
 
 If you're uncertain about some part of the codebase or some inner workings of the game and framework, please reach out either by leaving a comment in the relevant issue, discussion, or PR thread, or by posting a message in the [development Discord server](https://discord.gg/ppy). We will try to help you as much as we can.
 
 ## Resources
 
 - [Development roadmap](https://github.com/orgs/ppy/projects/7/views/6): What the core team is currently working on
-- [`ppy/osu-framework` wiki](https://github.com/ppy/osu-framework/wiki): Contains introductory information about osu!framework, the bespoke 2D game framework we use for the game
+- [`ppy/osu-framework` wiki](https://github.com/ppy/osu-framework/wiki): Contains introductory information about void!infinityframework, the bespoke 2D game framework we use for the game
 - [`ppy/osu` wiki](https://github.com/ppy/osu/wiki): Contains articles about various technical aspects of the game
-- [Figma master library](https://www.figma.com/file/VIkXMYNPMtQem2RJg9k2iQ/Master-Library): Contains finished and draft designs for osu!
+- [Figma master library](https://www.figma.com/file/VIkXMYNPMtQem2RJg9k2iQ/Master-Library): Contains finished and draft designs for void!infinity

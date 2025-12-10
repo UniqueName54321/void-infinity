@@ -45,11 +45,11 @@ namespace osu.Game.Localisation
         public static LocalisableString NoAutoplayMod => new TranslatableString(getKey(@"no_autoplay_mod"), @"The current ruleset doesn't have an autoplay mod available!");
 
         /// <summary>
-        /// "osu! doesn&#39;t seem to be able to play audio correctly.
+        /// "void!infinity doesn&#39;t seem to be able to play audio correctly.
         ///
         /// Please try changing your audio device to a working setting."
         /// </summary>
-        public static LocalisableString AudioPlaybackIssue => new TranslatableString(getKey(@"audio_playback_issue"), @"osu! doesn't seem to be able to play audio correctly.
+        public static LocalisableString AudioPlaybackIssue => new TranslatableString(getKey(@"audio_playback_issue"), @"void!infinity doesn't seem to be able to play audio correctly.
 
 Please try changing your audio device to a working setting.");
 
@@ -104,10 +104,10 @@ Please try changing your audio device to a working setting.");
         public static LocalisableString MismatchingBeatmapForReplay => new TranslatableString(getKey(@"mismatching_beatmap_for_replay"), @"Your local copy of the beatmap for this replay appears to be different than expected. You may need to update or re-download it.");
 
         /// <summary>
-        /// "You are now running osu! {0}.
+        /// "You are now running void!infinity {0}.
         /// Click to see what&#39;s new!"
         /// </summary>
-        public static LocalisableString GameVersionAfterUpdate(string version) => new TranslatableString(getKey(@"game_version_after_update"), @"You are now running osu! {0}.
+        public static LocalisableString GameVersionAfterUpdate(string version) => new TranslatableString(getKey(@"game_version_after_update"), @"You are now running void!infinity {0}.
 Click to see what's new!", version);
 
         /// <summary>

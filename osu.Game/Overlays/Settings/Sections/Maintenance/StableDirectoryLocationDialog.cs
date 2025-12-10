@@ -17,7 +17,7 @@ namespace osu.Game.Overlays.Settings.Sections.Maintenance
 
         public StableDirectoryLocationDialog(TaskCompletionSource<string> taskCompletionSource)
         {
-            HeaderText = "Failed to automatically locate an osu!stable installation.";
+            HeaderText = "Failed to automatically locate an void!infinitystable installation.";
             BodyText = "An existing install could not be located. If you know where it is, you can help locate it.";
             Icon = FontAwesome.Solid.QuestionCircle;
 
@@ -30,7 +30,7 @@ namespace osu.Game.Overlays.Settings.Sections.Maintenance
                 },
                 new PopupDialogCancelButton
                 {
-                    Text = "Actually I don't have osu!stable installed.",
+                    Text = "Actually I don't have void!infinitystable installed.",
                     Action = () => taskCompletionSource.TrySetCanceled()
                 }
             };

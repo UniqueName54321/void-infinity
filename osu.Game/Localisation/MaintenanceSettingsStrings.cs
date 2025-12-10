@@ -40,14 +40,14 @@ namespace osu.Game.Localisation
         public static LocalisableString SelectNewLocation => new TranslatableString(getKey(@"select_new_location"), @"Please select a new location");
 
         /// <summary>
-        /// "The target directory already seems to have an osu! install. Use that data instead?"
+        /// "The target directory already seems to have an void!infinity install. Use that data instead?"
         /// </summary>
-        public static LocalisableString TargetDirectoryAlreadyInstalledOsu => new TranslatableString(getKey(@"target_directory_already_installed_osu"), @"The target directory already seems to have an osu! install. Use that data instead?");
+        public static LocalisableString TargetDirectoryAlreadyInstalledOsu => new TranslatableString(getKey(@"target_directory_already_installed_osu"), @"The target directory already seems to have an void!infinity install. Use that data instead?");
 
         /// <summary>
-        /// "To complete this operation, osu! will close. Please open it again to use the new data location."
+        /// "To complete this operation, void!infinity will close. Please open it again to use the new data location."
         /// </summary>
-        public static LocalisableString RestartAndReOpenRequiredForCompletion => new TranslatableString(getKey(@"restart_and_re_open_required_for_completion"), @"To complete this operation, osu! will close. Please open it again to use the new data location.");
+        public static LocalisableString RestartAndReOpenRequiredForCompletion => new TranslatableString(getKey(@"restart_and_re_open_required_for_completion"), @"To complete this operation, void!infinity will close. Please open it again to use the new data location.");
 
         /// <summary>
         /// "Delete ALL beatmaps"
@@ -130,9 +130,9 @@ namespace osu.Game.Localisation
         public static LocalisableString NoModPresetsFoundToRestore => new TranslatableString(getKey(@"no_mod_presets_found_to_restore"), @"No mod presets found to restore!");
 
         /// <summary>
-        /// "Please select your osu!stable install location"
+        /// "Please select your void!infinitystable install location"
         /// </summary>
-        public static LocalisableString StableDirectorySelectHeader => new TranslatableString(getKey(@"stable_directory_select_header"), @"Please select your osu!stable install location");
+        public static LocalisableString StableDirectorySelectHeader => new TranslatableString(getKey(@"stable_directory_select_header"), @"Please select your void!infinitystable install location");
 
         private static string getKey(string key) => $"{prefix}:{key}";
     }

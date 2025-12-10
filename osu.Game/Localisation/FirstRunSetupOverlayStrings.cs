@@ -28,7 +28,7 @@ namespace osu.Game.Localisation
         /// <summary>
         /// "Set up osu! to suit you"
         /// </summary>
-        public static LocalisableString FirstRunSetupDescription => new TranslatableString(getKey(@"first_run_setup_description"), @"Set up osu! to suit you");
+        public static LocalisableString FirstRunSetupDescription => new TranslatableString(getKey(@"first_run_setup_description"), @"Set up void!infinity to suit you");
 
         /// <summary>
         /// "Welcome"
@@ -42,12 +42,12 @@ namespace osu.Game.Localisation
         /// </summary>
         public static LocalisableString WelcomeDescription => new TranslatableString(getKey(@"welcome_description"), @"Welcome to the first-run setup guide!
 
-osu! is a very configurable game, and diving straight into the settings can sometimes be overwhelming. This guide will help you get the important choices out of the way to ensure a great first experience!");
+void!infinity is a very configurable game, and diving straight into the settings can sometimes be overwhelming. This guide will help you get the important choices out of the way to ensure a great first experience!");
 
         /// <summary>
         /// "The size of the osu! user interface can be adjusted to your liking."
         /// </summary>
-        public static LocalisableString UIScaleDescription => new TranslatableString(getKey(@"ui_scale_description"), @"The size of the osu! user interface can be adjusted to your liking.");
+        public static LocalisableString UIScaleDescription => new TranslatableString(getKey(@"ui_scale_description"), @"The size of the void!infinity user interface can be adjusted to your liking.");
 
         /// <summary>
         /// "Behaviour"
@@ -57,12 +57,12 @@ osu! is a very configurable game, and diving straight into the settings can some
         /// <summary>
         /// "Some new defaults for game behaviours have been implemented, with the aim of improving the game experience and making it more accessible to everyone.
         ///
-        /// We recommend you give the new defaults a try, but if you&#39;d like to have things feel more like classic versions of osu!, you can easily apply some sane defaults below."
+        /// We recommend you give the new defaults a try, but if you&#39;d like to have things feel more like classic versions of void!infinity, you can easily apply some sane defaults below."
         /// </summary>
         public static LocalisableString BehaviourDescription => new TranslatableString(getKey(@"behaviour_description"),
             @"Some new defaults for game behaviours have been implemented, with the aim of improving the game experience and making it more accessible to everyone.
 
-We recommend you give the new defaults a try, but if you'd like to have things feel more like classic versions of osu!, you can easily apply some sane defaults below.");
+We recommend you give the new defaults a try, but if you'd like to have things feel more like classic versions of void!infinity, you can easily apply some sane defaults below.");
 
         /// <summary>
         /// "New defaults"

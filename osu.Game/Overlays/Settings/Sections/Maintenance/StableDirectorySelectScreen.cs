@@ -22,7 +22,7 @@ namespace osu.Game.Overlays.Settings.Sections.Maintenance
 
         protected override bool IsValidDirectory(DirectoryInfo? info) => legacyImportManager.IsUsableForStableImport(info, out _);
 
-        public override LocalisableString HeaderText => "Please select your osu!stable install location";
+        public override LocalisableString HeaderText => "Please select your void!infinitystable install location";
 
         public StableDirectorySelectScreen(TaskCompletionSource<string> taskCompletionSource)
         {

@@ -1,9 +1,9 @@
 {
   "profiles": {
-    "osu! Desktop": {
+    "void!infinity Desktop": {
       "commandName": "Project"
     },
-    "osu! Tournament": {
+    "void!infinity Tournament": {
       "commandName": "Project",
       "commandLineArgs": "--tournament"
     }

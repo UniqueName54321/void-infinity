@@ -1,8 +1,8 @@
 <p align="center">
-  <img width="500" alt="osu! logo" src="assets/lazer.png">
+  <img width="500" alt="void!infinity logo" src="assets/lazer.png">
 </p>
 
-# osu!
+# void!infinity
 
 [![Build status](https://github.com/ppy/osu/actions/workflows/ci.yml/badge.svg?branch=master&event=push)](https://github.com/ppy/osu/actions/workflows/ci.yml)
 [![GitHub release](https://img.shields.io/github/release/ppy/osu.svg)](https://github.com/ppy/osu/releases/latest)
@@ -12,19 +12,19 @@
 
 A free-to-win rhythm game. Rhythm is just a *click* away!
 
-This is the future – and final – iteration of the [osu!](https://osu.ppy.sh) game client which marks the beginning of an open era! Currently known by and released under the release codename "*lazer*". As in sharper than cutting-edge.
+This is the future – and final – iteration of the [void!infinity](https://osu.ppy.sh) game client which marks the beginning of an open era! Currently known by and released under the release codename "*lazer*". As in sharper than cutting-edge.
 
 ## Status
 
-This project is under constant development, but we do our best to keep things in a stable state. Players are encouraged to install from a release alongside their stable *osu!* client. This project will continue to evolve until we eventually reach the point where most users prefer it over the previous "osu!stable" release.
+This project is under constant development, but we do our best to keep things in a stable state. Players are encouraged to install from a release alongside their stable *void!infinity* client. This project will continue to evolve until we eventually reach the point where most users prefer it over the previous "void!infinitystable" release.
 
 A few resources are available as starting points to getting involved and understanding the project:
 
-- Detailed release changelogs are available on the [official osu! site](https://osu.ppy.sh/home/changelog/lazer).
+- Detailed release changelogs are available on the [official void!infinity site](https://osu.ppy.sh/home/changelog/lazer).
 - You can learn more about our approach to [project management](https://github.com/ppy/osu/wiki/Project-management).
 - Track our current efforts [towards improving the game](https://github.com/orgs/ppy/projects/7/views/6).
 
-## Running osu!
+## Running void!infinity
 
 If you are just looking to give the game a whirl, you can grab the latest release for your platform:
 
@@ -33,7 +33,7 @@ If you are just looking to give the game a whirl, you can grab the latest releas
 | [Windows 10+ (x64)](https://github.com/ppy/osu/releases/latest/download/install.exe) | macOS 12+ ([Intel](https://github.com/ppy/osu/releases/latest/download/osu.app.Intel.zip), [Apple Silicon](https://github.com/ppy/osu/releases/latest/download/osu.app.Apple.Silicon.zip)) | [Linux (x64)](https://github.com/ppy/osu/releases/latest/download/osu.AppImage) | [iOS 13.4+](https://osu.ppy.sh/home/testflight) | [Android 5+](https://github.com/ppy/osu/releases/latest/download/sh.ppy.osulazer.apk) |
 |--------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| ------------- | ------------- | ------------- |
 
-You can also generally download a version for your current device from the [osu! site](https://osu.ppy.sh/home/download).
+You can also generally download a version for your current device from the [void!infinity site](https://osu.ppy.sh/home/download).
 
 If your platform is unsupported or not listed above, there is still a chance you can run the release or manually build it by following the instructions below.
 
@@ -41,11 +41,11 @@ If your platform is unsupported or not listed above, there is still a chance you
 
 ## Developing a custom ruleset
 
-osu! is designed to allow user-created gameplay variations, called "rulesets". Building one of these allows a developer to harness the power of the osu! beatmap library, game engine, and general UX for a new style of gameplay. To get started working on a ruleset, we have some templates available [here](https://github.com/ppy/osu/tree/master/Templates).
+void!infinity is designed to allow user-created gameplay variations, called "rulesets". Building one of these allows a developer to harness the power of the void!infinity beatmap library, game engine, and general UX for a new style of gameplay. To get started working on a ruleset, we have some templates available [here](https://github.com/ppy/osu/tree/master/Templates).
 
 You can see some examples of custom rulesets by visiting the [custom ruleset directory](https://github.com/ppy/osu/discussions/13096).
 
-## Developing osu!
+## Developing void!infinity
 
 ### Prerequisites
 
@@ -80,13 +80,13 @@ You should load the solution via one of the platform-specific `.slnf` files, rat
 - `osu.Android.slnf`
 - `osu.iOS.slnf`
 
-Run configurations for the recommended IDEs (listed above) are included. You should use the provided Build/Run functionality of your IDE to get things going. When testing or building new components, it's highly encouraged you use the `osu! (Tests)` project/configuration. More information on this is provided [below](#contributing).
+Run configurations for the recommended IDEs (listed above) are included. You should use the provided Build/Run functionality of your IDE to get things going. When testing or building new components, it's highly encouraged you use the `void!infinity (Tests)` project/configuration. More information on this is provided [below](#contributing).
 
 To build for mobile platforms, you will likely need to run `sudo dotnet workload restore` if you haven't done so previously. This will install Android/iOS tooling required to complete the build.
 
 #### From CLI
 
-You can also build and run *osu!* from the command-line with a single command:
+You can also build and run *void!infinity* from the command-line with a single command:
 
 ```shell
 dotnet run --project osu.Desktop
@@ -140,8 +140,8 @@ We love to reward quality contributions. If you have made a large contribution, 
 
 ## Licence
 
-*osu!*'s code and framework are licensed under the [MIT licence](https://opensource.org/licenses/MIT). Please see [the licence file](LICENCE) for more information. [tl;dr](https://tldrlegal.com/license/mit-license) you can do whatever you want as long as you include the original copyright and license notice in any copy of the software/source.
+*void!infinity*'s code and framework are licensed under the [MIT licence](https://opensource.org/licenses/MIT). Please see [the licence file](LICENCE) for more information. [tl;dr](https://tldrlegal.com/license/mit-license) you can do whatever you want as long as you include the original copyright and license notice in any copy of the software/source.
 
-Please note that this *does not cover* the usage of the "osu!" or "ppy" branding in any software, resources, advertising or promotion, as this is protected by trademark law.
+Please note that this *does not cover* the usage of the "void!infinity" or "ppy" branding in any software, resources, advertising or promotion, as this is protected by trademark law.
 
 Please also note that game resources are covered by a separate licence. Please see the [ppy/osu-resources](https://github.com/ppy/osu-resources) repository for clarifications.

@@ -3,7 +3,7 @@
 	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="34" />
 	<application android:allowBackup="true"
 				 android:supportsRtl="true"
-				 android:label="osu!"
+				 android:label="void!infinity"
 				 android:icon="@mipmap/ic_launcher"
 				 android:roundIcon="@mipmap/ic_launcher" />
 	<!-- for editor usage -->
