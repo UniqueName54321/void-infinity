@@ -316,7 +316,7 @@ namespace osu.Game.Screens.Play
                 },
                 FailOverlay = new FailOverlay
                 {
-                    SaveReplay = async () => await prepareAndImportScoreAsync(true).ConfigureAwait(false),
+                    SaveReplay = Configuration.AllowUserInteraction ? async () => await prepareAndImportScoreAsync(true).ConfigureAwait(false) : null,
                     OnRetry = Configuration.AllowUserInteraction ? () => Restart() : null,
                     OnQuit = () => PerformExitWithConfirmation(),
                 },
@@ -474,7 +474,7 @@ namespace osu.Game.Screens.Play
                 Children = new[]
                 {
                     DimmableStoryboard.OverlayLayerContainer.CreateProxy(),
-                    HUDOverlay = new HUDOverlay(DrawableRuleset, GameplayState.Mods)
+                    HUDOverlay = new HUDOverlay(DrawableRuleset, GameplayState.Mods, Configuration)
                     {
                         HoldToQuit =
                         {
