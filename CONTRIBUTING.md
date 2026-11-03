@@ -11,7 +11,7 @@ contributions are welcome, regardless of your experience level or whether you us
 1. [reporting bugs](#reporting-bugs)
 2. [suggesting features](#suggesting-features)
 3. [submitting pull requests](#submitting-pull-requests)
-4. [AI-assisted contributions](#ai-assisted-contributions)
+4. [AI](#ai)
 5. [development guidelines](#development-guidelines)
 6. [important notes](#important-notes)
 
@@ -59,32 +59,15 @@ before submitting one, please keep the following in mind:
 
 pull requests will be reviewed based on their usefulness, correctness, maintainability, and compatibility with the project's goals.
 
-## AI-assisted contributions
+## AI
 
-**AI-assisted contributions are allowed and welcome!**
+unlike upstream osu!, **AI is welcome in void!infinity!** in fact, many of void!infinity's early modifications were vibecoded by DifferentDance8/UniqueName54321.
 
-unlike upstream osu!, void!infinity does not prohibit contributions made with or assisted by AI or large language models (LLMs).
+however:
 
-you're welcome to use AI for things like:
-
-- writing or modifying code
-- debugging and troubleshooting
-- writing documentation
-- generating tests
-- understanding unfamiliar parts of the codebase
-- implementing features
-
-in fact, void!infinity only got to the state it's at currently thanks to AI work.
-
-however, there are still a few things to keep in mind:
-
-- **you're responsible for what you submit.** using AI doesn't excuse broken, unsafe, or otherwise unsuitable code.
-- please disclose significant AI involvement in your pull request, including which tools you used.
-- review and test AI-generated changes before submitting them.
-- make sure any submitted code can legally be included in the project.
-- don't submit large amounts of unreviewed AI-generated code just for the sake of contributing.
-
-AI-generated and human-written contributions are held to the same quality standards.
+- **you are responsible for your chosen AI tool's output.** if it produces broken, insecure, or otherwise unsuitable code, it's your responsibility to address that before submitting.
+- if you're using an AI coding agent, please make sure it reads and follows the instructions in [AGENTS.md](AGENTS.md).
+- AI-generated contributions are welcome, but they're not automatically guaranteed to be accepted. the same quality standards apply to everyone, regardless of how their code was written.
 
 ## development guidelines
 
