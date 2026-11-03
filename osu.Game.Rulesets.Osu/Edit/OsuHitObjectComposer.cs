@@ -51,6 +51,7 @@ namespace osu.Game.Rulesets.Osu.Edit
             new HitCircleCompositionTool(),
             new SliderCompositionTool(),
             new SpinnerCompositionTool(),
+            new EventCompositionTool(),
             new GridFromPointsTool()
         };
 

@@ -40,6 +40,9 @@ namespace osu.Game.Database
             if (beatmapInfo == null)
                 return base.GetFileContents(model, file);
 
+            if (file.Filename.EndsWith(".vib", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Native void!infinity beatmaps must be exported as .vibz to preserve their editor features.");
+
             // Read the beatmap contents and skin
             using var contentStream = base.GetFileContents(model, file);
 

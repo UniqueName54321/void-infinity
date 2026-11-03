@@ -32,7 +32,7 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
 
             // For sanity, ensures that both the first hitobject and the first hitobject after a spinner start a new combo.
             // This is normally enforced by the legacy decoder, but is not enforced by the editor.
-            foreach (var obj in Beatmap.HitObjects.OfType<IHasComboInformation>())
+            foreach (var obj in Beatmap.HitObjects.Where(h => h is not BeatmapEvent).OfType<IHasComboInformation>())
             {
                 if (obj is not Spinner && (lastObj == null || lastObj is Spinner))
                     obj.NewCombo = true;
@@ -51,7 +51,7 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
 
         internal static void ApplyStacking(IBeatmap beatmap)
         {
-            var hitObjects = beatmap.HitObjects as List<OsuHitObject> ?? beatmap.HitObjects.OfType<OsuHitObject>().ToList();
+            var hitObjects = beatmap.HitObjects.OfType<OsuHitObject>().Where(h => h is not BeatmapEvent).ToList();
 
             if (hitObjects.Count > 0)
             {

@@ -184,7 +184,7 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders.Components
         /// </summary>
         private void updateMarkerDisplay()
         {
-            Position = hitObject.StackedPosition + ControlPoint.Position;
+            Position = hitObject.StackedPosition + ControlPoint.Position + ControlPoint.Movement;
 
             markerRing.Alpha = IsSelected.Value ? 1 : 0;
 

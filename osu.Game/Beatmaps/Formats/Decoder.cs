@@ -35,6 +35,7 @@ namespace osu.Game.Beatmaps.Formats
         {
             LegacyBeatmapDecoder.Register();
             JsonBeatmapDecoder.Register();
+            VibBeatmapDecoder.Register();
             LegacyStoryboardDecoder.Register();
         }
 

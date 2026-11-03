@@ -27,8 +27,20 @@ namespace osu.Game.Screens.Edit.Setup
         [BackgroundDependencyLoader]
         private void load()
         {
+            var clampMovement = new BindableBool(Beatmap.ClampSliderMovement);
+            clampMovement.ValueChanged += e =>
+            {
+                Beatmap.ClampSliderMovement = e.NewValue;
+                Beatmap.SaveState();
+            };
             Children = new Drawable[]
             {
+                new FormCheckBox
+                {
+                    Caption = "Clamp slider control point movement",
+                    HintText = "Limit movement to a 64px radius around each control point.",
+                    Current = clampMovement,
+                },
                 circleSizeSlider = new FormSliderBar<float>
                 {
                     Caption = BeatmapsetsStrings.ShowStatsCs,

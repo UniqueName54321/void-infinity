@@ -73,6 +73,7 @@ namespace osu.Game.Beatmaps
             beatmap.HitObjects = convertHitObjects(original.HitObjects, original, cancellationToken).OrderBy(s => s.StartTime).ToList();
             beatmap.Breaks = original.Breaks;
             beatmap.UnhandledEventLines = original.UnhandledEventLines;
+            beatmap.ClampSliderMovement = original.ClampSliderMovement;
             beatmap.AudioLeadIn = original.AudioLeadIn;
             beatmap.StackLeniency = original.StackLeniency;
             beatmap.SpecialStyle = original.SpecialStyle;
@@ -91,12 +92,17 @@ namespace osu.Game.Beatmaps
             return beatmap;
         }
 
+        protected virtual bool SupportsBeatmapEvents => false;
+
         private List<T> convertHitObjects(IReadOnlyList<HitObject> hitObjects, IBeatmap beatmap, CancellationToken cancellationToken)
         {
             var result = new List<T>(hitObjects.Count);
 
             foreach (var obj in hitObjects)
             {
+                if (obj is IHasBeatmapEvent && !SupportsBeatmapEvents)
+                    continue;
+
                 if (obj is T tObj)
                 {
                     result.Add(tObj);

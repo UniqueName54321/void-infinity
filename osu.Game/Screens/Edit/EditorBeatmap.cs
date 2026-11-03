@@ -72,6 +72,12 @@ namespace osu.Game.Screens.Edit
         private readonly BeatmapInfo beatmapInfo;
         public readonly IBeatmap PlayableBeatmap;
 
+        public bool ClampSliderMovement
+        {
+            get => PlayableBeatmap.ClampSliderMovement;
+            set => PlayableBeatmap.ClampSliderMovement = value;
+        }
+
         /// <summary>
         /// Whether at least one timing control point is present and providing timing information.
         /// </summary>
@@ -467,6 +473,10 @@ namespace osu.Game.Screens.Edit
             BeatmapVersion = LegacyBeatmapEncoder.FIRST_LAZER_VERSION;
             beatmapProcessor.PreProcess();
 
+            attributeTimeline = new BeatmapAttributeTimeline(this);
+            if (batchPendingDeletes.Concat(batchPendingInserts).Concat(batchPendingUpdates).Any(h => h is IHasBeatmapEvent))
+                foreach (var h in HitObjects) batchPendingUpdates.Add(h);
+
             foreach (var h in batchPendingDeletes) processHitObject(h);
             foreach (var h in batchPendingInserts) processHitObject(h);
             foreach (var h in batchPendingUpdates) processHitObject(h);
@@ -499,7 +509,9 @@ namespace osu.Game.Screens.Edit
         /// </summary>
         public void Clear() => RemoveRange(HitObjects.ToArray());
 
-        private void processHitObject(HitObject hitObject) => hitObject.ApplyDefaults(ControlPointInfo, PlayableBeatmap.Difficulty);
+        private BeatmapAttributeTimeline attributeTimeline;
+
+        private void processHitObject(HitObject hitObject) => hitObject.ApplyDefaults(ControlPointInfo, (attributeTimeline ?? new BeatmapAttributeTimeline(this)).At(hitObject.StartTime));
 
         private void trackStartTime(HitObject hitObject)
         {

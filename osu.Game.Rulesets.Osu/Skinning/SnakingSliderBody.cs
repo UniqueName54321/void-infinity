@@ -77,6 +77,8 @@ namespace osu.Game.Rulesets.Osu.Skinning
 
             Slider slider = drawableSlider.HitObject;
 
+            if (slider.HasMovement) Refresh();
+
             int span = slider.SpanAt(completionProgress);
             double spanProgress = slider.ProgressAt(completionProgress);
 
@@ -105,7 +107,7 @@ namespace osu.Game.Rulesets.Osu.Skinning
                 return;
 
             // Generate the entire curve
-            drawableSlider.HitObject.Path.GetPathToProgress(CurrentCurve, 0, 1);
+            drawableSlider.HitObject.PathAt(System.Math.Clamp((Time.Current - drawableSlider.HitObject.StartTime) / drawableSlider.HitObject.Duration, 0, 1)).GetPathToProgress(CurrentCurve, 0, 1);
             SetVertices(CurrentCurve);
 
             // Force the body to be the final path size to avoid excessive autosize computations
@@ -150,7 +152,7 @@ namespace osu.Game.Rulesets.Osu.Skinning
             SnakedStart = p0;
             SnakedEnd = p1;
 
-            drawableSlider.HitObject.Path.GetPathToProgress(CurrentCurve, p0, p1);
+            drawableSlider.HitObject.PathAt(System.Math.Clamp((Time.Current - drawableSlider.HitObject.StartTime) / drawableSlider.HitObject.Duration, 0, 1)).GetPathToProgress(CurrentCurve, p0, p1);
 
             SetVertices(CurrentCurve);
 

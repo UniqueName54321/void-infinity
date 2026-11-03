@@ -22,6 +22,8 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
         {
         }
 
+        protected override bool SupportsBeatmapEvents => true;
+
         public override bool CanConvert() => Beatmap.HitObjects.All(h => h is IHasPosition);
 
         protected override IEnumerable<OsuHitObject> ConvertHitObject(HitObject original, IBeatmap beatmap, CancellationToken cancellationToken)
@@ -33,6 +35,9 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
 
             switch (original)
             {
+                case IHasBeatmapEvent e:
+                    return new BeatmapEvent { StartTime = original.StartTime, Position = positionData?.Position ?? Vector2.Zero, Change = e.Change }.Yield();
+
                 case IHasPathWithRepeats curveData:
                     return new Slider
                     {

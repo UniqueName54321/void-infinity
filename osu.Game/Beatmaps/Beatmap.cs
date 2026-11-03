@@ -122,6 +122,8 @@ namespace osu.Game.Beatmaps
             return Math.Clamp(mostCommon.beatLength, minBeatLength, maxBeatLength);
         }
 
+        public bool ClampSliderMovement { get; set; } = true;
+
         public double AudioLeadIn { get; set; }
 
         public float StackLeniency { get; set; } = 0.7f;

@@ -44,7 +44,7 @@ namespace osu.Game.Screens.Edit.Compose.Components
 
             // I'd hope there's a better way to do this, but I don't want to bind to each and every property above to watch for changes.
             // This is a good middle-ground for the time being.
-            if (objects.Length > 0)
+            if (objects.Length > 0 && objects.All(h => h is not IHasBeatmapEvent))
                 rollingTextUpdate ??= Scheduler.AddDelayed(updateInspectorText, 250);
         }
 

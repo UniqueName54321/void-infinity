@@ -162,9 +162,14 @@ namespace osu.Game.Rulesets.Osu.Utils
 
         private static void modifySlider(Slider slider, Action<PathControlPoint> modifyControlPoint)
         {
-            var controlPoints = slider.Path.ControlPoints.Select(p => new PathControlPoint(p.Position, p.Type)).ToArray();
+            var controlPoints = slider.Path.ControlPoints.Select(p => p.Clone()).ToArray();
             foreach (var point in controlPoints)
+            {
                 modifyControlPoint(point);
+                var displacement = new PathControlPoint(point.Movement);
+                modifyControlPoint(displacement);
+                point.Movement = displacement.Position;
+            }
 
             slider.Path = new SliderPath(controlPoints, slider.Path.ExpectedDistance.Value);
         }

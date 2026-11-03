@@ -39,7 +39,7 @@ namespace osu.Game.Rulesets.Objects.Legacy
         [JsonIgnore]
         public double Duration
         {
-            get => this.SpanCount() * Distance / Velocity;
+            get => this.SpanCount() * Distance / Velocity * new SliderVelocityProfile(System.Linq.Enumerable.ToArray(Path.ControlPoints)).DurationMultiplier;
             set => throw new System.NotSupportedException($"Adjust via {nameof(RepeatCount)} instead"); // can be implemented if/when needed.
         }
 

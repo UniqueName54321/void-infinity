@@ -6,6 +6,9 @@
 using System.Linq;
 using NUnit.Framework;
 using osu.Framework.Graphics;
+using osu.Framework.Testing;
+using osu.Game.Graphics.UserInterface;
+using osu.Game.Graphics.UserInterfaceV2;
 using osu.Framework.Graphics.UserInterface;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
@@ -30,6 +33,39 @@ namespace osu.Game.Rulesets.Osu.Tests.Editor
             slider = new Slider();
             slider.ApplyDefaults(new ControlPointInfo(), new BeatmapDifficulty());
         });
+
+        [Test]
+        public void TestControlPointVelocityInput()
+        {
+            createVisualiser(true);
+            addControlPointStep(new Vector2(200), PathType.LINEAR);
+            addControlPointStep(new Vector2(300, 200));
+            moveMouseToControlPoint(1);
+            AddStep("select point", () => InputManager.Click(MouseButton.Left));
+            AddStep("open velocity input", () => visualiser.ContextMenuItems.Single(i => i.Text.Value == "Change velocity").Action.Value.Invoke());
+            AddUntilStep("input loaded", () => visualiser.ChildrenOfType<OsuTextBox>().Any());
+            AddStep("set velocity", () => visualiser.ChildrenOfType<OsuTextBox>().Single().Text = "0.5");
+            AddStep("accept", () => visualiser.ChildrenOfType<RoundedButton>().Single(b => b.Text == "Accept").TriggerClick());
+            AddAssert("velocity changed", () => slider.Path.ControlPoints[1].Velocity == 0.5);
+        }
+
+        [Test]
+        public void TestControlPointMovementClampsAndAccepts()
+        {
+            createVisualiser(true);
+            addControlPointStep(new Vector2(200), PathType.LINEAR);
+            addControlPointStep(new Vector2(300, 200));
+            moveMouseToControlPoint(1);
+            AddStep("select point", () => InputManager.Click(MouseButton.Left));
+            AddStep("start movement", () => visualiser.ContextMenuItems.Single(i => i.Text.Value == "Add movement").Action.Value.Invoke());
+            AddStep("drag point", () => InputManager.PressButton(MouseButton.Left));
+            AddStep("move beyond radius", () => InputManager.MoveMouseTo(visualiser.ToScreenSpace(new Vector2(450, 200))));
+            AddStep("release", () => InputManager.ReleaseButton(MouseButton.Left));
+            AddAssert("movement clamped", () => slider.Path.ControlPoints[1].Movement.Length, () => Is.EqualTo(64).Within(0.01));
+            AddAssert("base point unchanged", () => slider.Path.ControlPoints[1].Position == new Vector2(300, 200));
+            AddStep("accept", () => visualiser.ChildrenOfType<RoundedButton>().Single(b => b.Text == "Accept").TriggerClick());
+            AddAssert("movement retained", () => slider.Path.ControlPoints[1].Movement.Length, () => Is.EqualTo(64).Within(0.01));
+        }
 
         [Test]
         public void TestPerfectCurveTooManyPoints()

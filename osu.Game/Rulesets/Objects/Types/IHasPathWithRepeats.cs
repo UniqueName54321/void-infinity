@@ -13,6 +13,12 @@ namespace osu.Game.Rulesets.Objects.Types
     {
     }
 
+    public interface IHasVariablePath : IHasPathWithRepeats
+    {
+        double PathProgressAt(double completionProgress);
+        Vector2 CurvePositionAt(double completionProgress);
+    }
+
     public static class HasPathWithRepeatsExtensions
     {
         /// <summary>
@@ -22,7 +28,7 @@ namespace osu.Game.Rulesets.Objects.Types
         /// <param name="progress">[0, 1] where 0 is the start time of the <see cref="HitObject"/> and 1 is the end time of the <see cref="HitObject"/>.</param>
         /// <returns>The position on the curve.</returns>
         public static Vector2 CurvePositionAt(this IHasPathWithRepeats obj, double progress)
-            => obj.Path.PositionAt(obj.ProgressAt(progress));
+            => obj is IHasVariablePath variable ? variable.CurvePositionAt(progress) : obj.Path.PositionAt(obj.ProgressAt(progress));
 
         /// <summary>
         /// Computes the progress along the curve relative to how much of the <see cref="HitObject"/> has been completed.
@@ -32,6 +38,7 @@ namespace osu.Game.Rulesets.Objects.Types
         /// <returns>[0, 1] where 0 is the beginning of the curve and 1 is the end of the curve.</returns>
         public static double ProgressAt(this IHasPathWithRepeats obj, double progress)
         {
+            if (obj is IHasVariablePath variable) return variable.PathProgressAt(progress);
             double p = progress * obj.SpanCount() % 1;
             if (obj.SpanAt(progress) % 2 == 1)
                 p = 1 - p;

@@ -4,6 +4,7 @@
 #nullable disable
 
 using System;
+using osu.Game.Rulesets.Objects.Types;
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
@@ -264,11 +265,21 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
             double completionProgress = Math.Clamp((Time.Current - HitObject.StartTime) / HitObject.Duration, 0, 1);
 
+            if (HitObject.HasMovement)
+            {
+                var currentPath = HitObject.PathAt(completionProgress);
+                foreach (var tick in NestedHitObjects.OfType<DrawableSliderTick>())
+                    tick.Position = currentPath.PositionAt(((SliderTick)tick.HitObject).PathProgress);
+                foreach (var repeat in NestedHitObjects.OfType<DrawableSliderRepeat>())
+                    repeat.Position = currentPath.PositionAt(((SliderRepeat)repeat.HitObject).PathProgress);
+                TailCircle.Position = currentPath.PositionAt(HitObject.SpanCount() % 2);
+                HeadCircle.Position = currentPath.PositionAt(0);
+            }
             Ball.UpdateProgress(completionProgress);
             SliderBody?.UpdateProgress(HeadCircle.IsHit ? completionProgress : 0);
 
             foreach (DrawableSliderRepeat repeat in repeatContainer)
-                repeat.UpdateSnakingPosition(HitObject.Path.PositionAt(SliderBody?.SnakedStart ?? 0), HitObject.Path.PositionAt(SliderBody?.SnakedEnd ?? 0));
+                repeat.UpdateSnakingPosition(HitObject.PathAt(completionProgress).PositionAt(SliderBody?.SnakedStart ?? 0), HitObject.PathAt(completionProgress).PositionAt(SliderBody?.SnakedEnd ?? 0));
 
             Size = SliderBody?.Size ?? Vector2.Zero;
             OriginPosition = SliderBody?.PathOffset ?? Vector2.Zero;

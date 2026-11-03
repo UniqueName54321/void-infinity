@@ -329,7 +329,7 @@ namespace osu.Game.Rulesets.Osu.Edit
                         mergedHitObject.Path.ControlPoints.RemoveAt(mergedHitObject.Path.ControlPoints.Count - 1);
                     }
 
-                    mergedHitObject.Path.ControlPoints.AddRange(hasPath.Path.ControlPoints.Select(o => new PathControlPoint(o.Position + offset, o.Type)));
+                    mergedHitObject.Path.ControlPoints.AddRange(hasPath.Path.ControlPoints.Select(o => new PathControlPoint(o.Position + offset, o.Type) { Velocity = o.Velocity, Movement = o.Movement }));
                     lastCircle = false;
                 }
                 else

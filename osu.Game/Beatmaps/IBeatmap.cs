@@ -70,6 +70,8 @@ namespace osu.Game.Beatmaps
         /// </summary>
         double GetMostCommonBeatLength();
 
+        bool ClampSliderMovement { get; set; }
+
         double AudioLeadIn { get; internal set; }
 
         float StackLeniency { get; internal set; }

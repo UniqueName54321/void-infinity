@@ -8,6 +8,10 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
+using System.Globalization;
+using osu.Game.Graphics.Sprites;
+using osu.Game.Graphics.UserInterfaceV2;
+using osu.Framework.Graphics.Shapes;
 using Humanizer;
 using JetBrains.Annotations;
 using osu.Framework.Allocation;
@@ -45,6 +49,98 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders.Components
         private readonly bool allowSelection;
 
         private InputManager inputManager;
+
+        [Resolved(CanBeNull = true)]
+        private EditorBeatmap editorBeatmap { get; set; }
+
+        private Container editPanel;
+        private Container movementRadius;
+        private PathControlPoint movementPoint;
+        private Vector2 originalMovement;
+
+        private void closePanel(bool accept)
+        {
+            if (movementPoint != null)
+            {
+                if (!accept) movementPoint.Movement = originalMovement;
+                movementPoint = null;
+                changeHandler?.EndChange();
+            }
+            editPanel?.Expire();
+            editPanel = null;
+            movementRadius?.Expire();
+            movementRadius = null;
+        }
+
+        private void showPanel(params Drawable[] controls)
+        {
+            editPanel = new Container
+            {
+                Position = new Vector2(10, 10),
+                Size = new Vector2(300, 100),
+                Children = new Drawable[]
+                {
+                    new Box { RelativeSizeAxes = Axes.Both, Colour = Colour4.Black.Opacity(0.9f) },
+                    new FillFlowContainer
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        Direction = FillDirection.Vertical,
+                        Padding = new MarginPadding(5),
+                        Spacing = new Vector2(3),
+                        Children = controls
+                    }
+                }
+            };
+            AddInternal(editPanel);
+        }
+
+        private void changeVelocity()
+        {
+            closePanel(false);
+            var points = Pieces.Where(p => p.IsSelected.Value).Select(p => p.ControlPoint).ToArray();
+            var input = new OsuTextBox { RelativeSizeAxes = Axes.X, Height = 25, Text = points[0].Velocity.ToString(CultureInfo.InvariantCulture) };
+            var label = new OsuSpriteText { Text = "Velocity multiplier (greater than 0, up to 100)", Font = osu.Game.Graphics.OsuFont.Default.With(size: 14) };
+            showPanel(label, input, new RoundedButton
+            {
+                Text = "Accept", Size = new Vector2(130, 25),
+                Action = () =>
+                {
+                    if (!double.TryParse(input.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out double value) || !double.IsFinite(value) || value <= 0 || value > 100)
+                    {
+                        label.Text = "Enter a finite value in (0, 100].";
+                        return;
+                    }
+                    changeHandler?.BeginChange();
+                    foreach (var point in points) point.Velocity = value;
+                    changeHandler?.EndChange();
+                    closePanel(true);
+                }
+            });
+        }
+
+        private void addMovement()
+        {
+            closePanel(false);
+            movementPoint = Pieces.First(p => p.IsSelected.Value).ControlPoint;
+            originalMovement = movementPoint.Movement;
+            changeHandler?.BeginChange();
+            showPanel(new OsuSpriteText { Text = "Drag the point to its end position, then Accept.", Font = osu.Game.Graphics.OsuFont.Default.With(size: 14) },
+                new RoundedButton { Text = "Accept", Size = new Vector2(130, 25), Action = () => closePanel(true) },
+                new RoundedButton { Text = "Cancel", Size = new Vector2(130, 25), Action = () => closePanel(false) });
+            if (editorBeatmap?.ClampSliderMovement != false)
+            {
+                movementRadius = new Container { Position = hitObject.StackedPosition + movementPoint.Position, Size = Vector2.Zero };
+                for (int i = 0; i < 48; i++)
+                {
+                    double angle = i * Math.PI * 2 / 48;
+                    movementRadius.Add(new Circle { Position = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * 64,
+                        Size = new Vector2(2), Origin = Anchor.Centre, Colour = Colour4.White });
+                }
+                AddInternal(movementRadius);
+            }
+        }
+
 
         public Action<List<PathControlPoint>> RemoveControlPointsRequested;
         public Action<List<PathControlPoint>> SplitControlPointsRequested;
@@ -358,6 +454,7 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders.Components
 
             if (draggedControlPointIndex >= 0)
                 DragEnded();
+            closePanel(false);
         }
 
         private void selectionRequested(PathControlPointPiece<T> piece, MouseButtonEvent e)
@@ -431,11 +528,20 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders.Components
 
             Debug.Assert(draggedControlPointIndex >= 0);
 
-            changeHandler?.BeginChange();
+            if (movementPoint == null)
+                changeHandler?.BeginChange();
         }
 
         public void DragInProgress(DragEvent e)
         {
+            if (movementPoint != null)
+            {
+                Vector2 offset = Parent!.ToLocalSpace(e.ScreenSpaceMousePosition) - hitObject.Position - movementPoint.Position;
+                if (editorBeatmap?.ClampSliderMovement != false && offset.Length > 64)
+                    offset = Vector2.Normalize(offset) * 64;
+                movementPoint.Movement = offset;
+                return;
+            }
             Vector2[] oldControlPoints = hitObject.Path.ControlPoints.Select(cp => cp.Position).ToArray();
             Vector2 oldPosition = hitObject.Position;
             double oldStartTime = hitObject.StartTime;
@@ -516,7 +622,8 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders.Components
 
         public void DragEnded()
         {
-            changeHandler?.EndChange();
+            if (movementPoint == null)
+                changeHandler?.EndChange();
             draggedControlPointIndex = -1;
         }
 
@@ -569,6 +676,15 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders.Components
                         Items = curveTypeItems
                     }
                 };
+
+                menuItems.Add(new OsuMenuItem("Change velocity", MenuItemType.Standard, changeVelocity));
+                menuItems.Add(new OsuMenuItem("Add movement", MenuItemType.Standard, addMovement));
+                menuItems.Add(new OsuMenuItem("Remove movement", MenuItemType.Standard, () =>
+                {
+                    changeHandler?.BeginChange();
+                    foreach (var piece in selectedPieces) piece.ControlPoint.Movement = Vector2.Zero;
+                    changeHandler?.EndChange();
+                }));
 
                 if (splittableCount > 0)
                 {

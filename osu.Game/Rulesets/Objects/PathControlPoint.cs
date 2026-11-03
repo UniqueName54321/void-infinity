@@ -31,6 +31,43 @@ namespace osu.Game.Rulesets.Objects
             }
         }
 
+        private double velocity = 1;
+
+        /// <summary>Velocity multiplier at this point, interpolated along the path.</summary>
+        [JsonProperty]
+        [System.ComponentModel.DefaultValue(1d)]
+        public double Velocity
+        {
+            get => velocity;
+            set
+            {
+                if (!double.IsFinite(value) || value <= 0 || value > 100)
+                    throw new ArgumentOutOfRangeException(nameof(value), "Velocity must be finite and in (0, 100].");
+                if (velocity == value) return;
+                velocity = value;
+                Changed?.Invoke();
+            }
+        }
+
+        private Vector2 movement;
+
+        /// <summary>Displacement over the slider's entire duration, relative to Position.</summary>
+        [JsonProperty]
+        public Vector2 Movement
+        {
+            get => movement;
+            set
+            {
+                if (!float.IsFinite(value.X) || !float.IsFinite(value.Y))
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                if (movement == value) return;
+                movement = value;
+                Changed?.Invoke();
+            }
+        }
+
+        public PathControlPoint Clone() => new PathControlPoint(Position, Type) { Velocity = Velocity, Movement = Movement };
+
         private PathType? type;
 
         /// <summary>
@@ -75,7 +112,7 @@ namespace osu.Game.Rulesets.Objects
             Type = type;
         }
 
-        public bool Equals(PathControlPoint other) => Position == other?.Position && Type == other.Type;
+        public bool Equals(PathControlPoint other) => Position == other?.Position && Type == other.Type && Velocity == other.Velocity && Movement == other.Movement;
 
         public override string ToString() => type == null
             ? $"Position={Position}"

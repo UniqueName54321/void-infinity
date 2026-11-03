@@ -138,6 +138,7 @@ namespace osu.Game.Rulesets.Osu.UI
 
             var osuBeatmap = (OsuBeatmap?)beatmap;
 
+            RegisterPool<BeatmapEvent, DrawableBeatmapEvent>(4, 100);
             RegisterPool<HitCircle, DrawableHitCircle>(20, 100);
 
             // handle edge cases where a beatmap has a slider with many repeats.

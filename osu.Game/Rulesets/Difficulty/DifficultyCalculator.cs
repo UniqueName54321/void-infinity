@@ -350,6 +350,12 @@ namespace osu.Game.Rulesets.Difficulty
             public int BeatmapVersion => baseBeatmap.BeatmapVersion;
             public IBeatmap Clone() => new ProgressiveCalculationBeatmap(baseBeatmap.Clone());
 
+            public bool ClampSliderMovement
+            {
+                get => baseBeatmap.ClampSliderMovement;
+                set => baseBeatmap.ClampSliderMovement = value;
+            }
+
             public double AudioLeadIn
             {
                 get => baseBeatmap.AudioLeadIn;

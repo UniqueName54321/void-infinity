@@ -52,6 +52,16 @@ namespace osu.Game.Beatmaps.Formats
         protected override void ParseStreamInto(LineBufferedReader stream, Storyboard storyboard)
         {
             this.storyboard = storyboard;
+            if (stream.PeekLine()?.Trim() == VibBeatmapEncoder.MAGIC)
+            {
+                stream.ReadLine();
+                var document = Newtonsoft.Json.JsonConvert.DeserializeObject<VibDocument>(stream.ReadToEnd(), osu.Game.IO.Serialization.JsonSerializableExtensions.CreateGlobalSettings())
+                    ?? throw new System.IO.InvalidDataException("Missing native beatmap data.");
+                using var payload = new System.IO.MemoryStream(System.Text.Encoding.UTF8.GetBytes(document.Legacy));
+                using var reader = new LineBufferedReader(payload);
+                base.ParseStreamInto(reader, storyboard);
+                return;
+            }
             base.ParseStreamInto(stream, storyboard);
         }
 

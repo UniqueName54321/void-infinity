@@ -41,6 +41,9 @@ namespace osu.Game.Rulesets.Osu.Edit
         {
             switch (hitObject)
             {
+                case BeatmapEvent e:
+                    return new EventSelectionBlueprint(e);
+
                 case HitCircle circle:
                     return new HitCircleSelectionBlueprint(circle);
 

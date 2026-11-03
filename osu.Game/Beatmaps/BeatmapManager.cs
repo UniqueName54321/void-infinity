@@ -524,7 +524,7 @@ namespace osu.Game.Beatmaps
             {
                 using var stream = new MemoryStream();
                 using (var sw = new StreamWriter(stream, Encoding.UTF8, 1024, true))
-                    new LegacyBeatmapEncoder(beatmapContent, beatmapSkin).Encode(sw);
+                    new VibBeatmapEncoder(beatmapContent, beatmapSkin).Encode(sw);
 
                 stream.Seek(0, SeekOrigin.Begin);
 
@@ -568,7 +568,7 @@ namespace osu.Game.Beatmaps
             static string createBeatmapFilenameFromMetadata(BeatmapInfo beatmapInfo)
             {
                 var metadata = beatmapInfo.Metadata;
-                return $"{metadata.Artist} - {metadata.Title} ({metadata.Author.Username}) [{beatmapInfo.DifficultyName}].osu".GetValidFilename();
+                return $"{metadata.Artist} - {metadata.Title} ({metadata.Author.Username}) [{beatmapInfo.DifficultyName}].vib".GetValidFilename();
             }
         }
 

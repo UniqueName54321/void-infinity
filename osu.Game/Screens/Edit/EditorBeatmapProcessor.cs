@@ -46,7 +46,8 @@ namespace osu.Game.Screens.Edit
 
         private void autoGenerateBreaks()
         {
-            var objectDuration = Beatmap.HitObjects.Select(ho => (ho.StartTime - ((ho as IHasTimePreempt)?.TimePreempt ?? 0), ho.GetEndTime())).ToHashSet();
+            var playableObjects = Beatmap.HitObjects.Where(h => h is not osu.Game.Rulesets.Objects.IHasBeatmapEvent).ToArray();
+            var objectDuration = playableObjects.Select(ho => (ho.StartTime - ((ho as IHasTimePreempt)?.TimePreempt ?? 0), ho.GetEndTime())).ToHashSet();
 
             if (objectDuration.SetEquals(objectDurationCache))
                 return;
@@ -57,9 +58,9 @@ namespace osu.Game.Screens.Edit
 
             foreach (var manualBreak in Beatmap.Breaks.ToList())
             {
-                if (manualBreak.EndTime <= Beatmap.HitObjects.FirstOrDefault()?.StartTime
-                    || manualBreak.StartTime >= Beatmap.GetLastObjectTime()
-                    || Beatmap.HitObjects.Any(ho => ho.StartTime <= manualBreak.EndTime && ho.GetEndTime() >= manualBreak.StartTime))
+                if (manualBreak.EndTime <= playableObjects.FirstOrDefault()?.StartTime
+                    || manualBreak.StartTime >= playableObjects.Select(h => h.GetEndTime()).DefaultIfEmpty(0).Max()
+                    || playableObjects.Any(ho => ho.StartTime <= manualBreak.EndTime && ho.GetEndTime() >= manualBreak.StartTime))
                 {
                     Beatmap.Breaks.Remove(manualBreak);
                 }
@@ -67,10 +68,10 @@ namespace osu.Game.Screens.Edit
 
             double currentMaxEndTime = double.MinValue;
 
-            for (int i = 1; i < Beatmap.HitObjects.Count; ++i)
+            for (int i = 1; i < playableObjects.Length; ++i)
             {
-                var previousObject = Beatmap.HitObjects[i - 1];
-                var nextObject = Beatmap.HitObjects[i];
+                var previousObject = playableObjects[i - 1];
+                var nextObject = playableObjects[i];
 
                 // Keep track of the maximum end time encountered thus far.
                 // This handles cases like osu!mania's hold notes, which could have concurrent other objects after their start time.
@@ -116,7 +117,7 @@ namespace osu.Game.Screens.Edit
 
             foreach (var hitObject in Beatmap.HitObjects)
             {
-                if (hitObject is not IHasComboInformation hasCombo)
+                if (hitObject is osu.Game.Rulesets.Objects.IHasBeatmapEvent || hitObject is not IHasComboInformation hasCombo)
                     continue;
 
                 if (currentBreak < breakEnds.Count && hitObject.StartTime >= breakEnds[currentBreak])

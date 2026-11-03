@@ -3,6 +3,10 @@
 
 using System.Diagnostics;
 using System.Linq;
+using osu.Game.Graphics.UserInterfaceV2;
+using osu.Game.Screens.Edit.Components;
+using osu.Framework.Graphics.Sprites;
+using osuTK;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Screens.Edit.Compose.Components;
@@ -14,6 +18,16 @@ namespace osu.Game.Rulesets.Osu.Edit
         protected override void AddInspectorValues(HitObject[] objects)
         {
             base.AddInspectorValues(objects);
+
+            if (objects.Length == 1 && objects[0] is BeatmapEvent e)
+            {
+                AddHeader("Event type");
+                AddValue("Change beatmap attributes");
+                InspectorText.AddArbitraryDrawable(new EditorToolButton("Edit event",
+                    () => new SpriteIcon { Icon = FontAwesome.Solid.Cog },
+                    () => new BeatmapEventPopover(e)) { RelativeSizeAxes = osu.Framework.Graphics.Axes.None, Size = new Vector2(140, 30) });
+                return;
+            }
 
             if (objects.Length > 0)
             {

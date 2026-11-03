@@ -321,11 +321,13 @@ namespace osu.Game.Beatmaps
                 processor.PreProcess();
             }
 
+            var attributeTimeline = new osu.Game.Rulesets.Objects.BeatmapAttributeTimeline(converted);
+
             // Compute default values for hitobjects, including creating nested hitobjects in-case they're needed
             foreach (var obj in converted.HitObjects)
             {
                 token.ThrowIfCancellationRequested();
-                obj.ApplyDefaults(converted.ControlPointInfo, converted.Difficulty, token);
+                obj.ApplyDefaults(converted.ControlPointInfo, attributeTimeline.At(obj.StartTime), token);
             }
 
             foreach (var mod in mods.OfType<IApplicableToHitObject>())

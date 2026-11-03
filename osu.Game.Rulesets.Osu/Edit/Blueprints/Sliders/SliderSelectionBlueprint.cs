@@ -15,6 +15,8 @@ using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
 using osu.Framework.Utils;
 using osu.Game.Audio;
+using osu.Game.Overlays;
+using osu.Game.Overlays.Dialog;
 using osu.Game.Configuration;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Rulesets.Edit;
@@ -534,7 +536,7 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders
                     Samples = HitObject.Samples.Select(s => s.With()).ToList(),
                     RepeatCount = HitObject.RepeatCount,
                     NodeSamples = HitObject.NodeSamples.Select(n => (IList<HitSampleInfo>)n.Select(s => s.With()).ToList()).ToList(),
-                    Path = new SliderPath(splitControlPoints.Select(o => new PathControlPoint(o.Position - splitControlPoints[0].Position, o == splitControlPoints[^1] ? null : o.Type)).ToArray())
+                    Path = new SliderPath(splitControlPoints.Select(o => new PathControlPoint(o.Position - splitControlPoints[0].Position, o == splitControlPoints[^1] ? null : o.Type) { Velocity = o.Velocity, Movement = o.Movement }).ToArray())
                 };
 
                 // Increase the start time of the slider before adding the new slider so the new slider is immediately inserted at the correct index and internal state remains valid.
@@ -563,7 +565,34 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders
 
         // duplicated in `JuiceStreamSelectionBlueprint.convertToStream()`
         // consider extracting common helper when applying changes here
+        [Resolved]
+        private IDialogOverlay? dialogOverlay { get; set; }
+
         private void convertToStream()
+        {
+            if (HitObject.HasMovement)
+            {
+                dialogOverlay?.Push(new MovementRemovalDialog(() => convertToStreamConfirmed()));
+                return;
+            }
+            convertToStreamConfirmed();
+        }
+
+        private partial class MovementRemovalDialog : PopupDialog
+        {
+            public MovementRemovalDialog(Action convert)
+            {
+                HeaderText = "Remove slider movement?";
+                BodyText = "Converting this slider to a stream removes all its in-map movement.";
+                Buttons = new PopupDialogButton[]
+                {
+                    new PopupDialogDangerousButton { Text = "Convert to stream", Action = convert },
+                    new PopupDialogCancelButton { Text = "Cancel" }
+                };
+            }
+        }
+
+        private void convertToStreamConfirmed()
         {
             if (editorBeatmap == null || beatDivisor == null)
                 return;
@@ -580,11 +609,7 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders
             {
                 // positionWithRepeats is a fractional number in the range of [0, HitObject.SpanCount()]
                 // and indicates how many fractional spans of a slider have passed up to time.
-                double positionWithRepeats = (time - HitObject.StartTime) / HitObject.Duration * HitObject.SpanCount();
-                double pathPosition = positionWithRepeats - (int)positionWithRepeats;
-                // every second span is in the reverse direction - need to reverse the path position.
-                if (positionWithRepeats % 2 >= 1)
-                    pathPosition = 1 - pathPosition;
+                double pathPosition = HitObject.PathProgressAt((time - HitObject.StartTime) / HitObject.Duration);
 
                 Vector2 position = HitObject.Position + HitObject.Path.PositionAt(pathPosition);
 

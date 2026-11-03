@@ -22,7 +22,7 @@ namespace osu.Game.Beatmaps
         {
             IHasComboInformation? lastObj = null;
 
-            foreach (var obj in Beatmap.HitObjects.OfType<IHasComboInformation>())
+            foreach (var obj in Beatmap.HitObjects.Where(h => h is not osu.Game.Rulesets.Objects.IHasBeatmapEvent).OfType<IHasComboInformation>())
             {
                 obj.UpdateComboInformation(lastObj);
                 lastObj = obj;

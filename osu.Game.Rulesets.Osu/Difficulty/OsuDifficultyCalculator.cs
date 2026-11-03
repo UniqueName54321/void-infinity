@@ -78,7 +78,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty
             int sliderCount = beatmap.HitObjects.Count(h => h is Slider);
             int spinnerCount = beatmap.HitObjects.Count(h => h is Spinner);
 
-            int totalHits = beatmap.HitObjects.Count;
+            int totalHits = beatmap.HitObjects.Count(h => h is not BeatmapEvent);
 
             double drainRate = beatmap.Difficulty.DrainRate;
 
@@ -169,9 +169,10 @@ namespace osu.Game.Rulesets.Osu.Difficulty
 
             // The first jump is formed by the first two hitobjects of the map.
             // If the map has less than two OsuHitObjects, the enumerator will not return anything.
-            for (int i = 1; i < beatmap.HitObjects.Count; i++)
+            var playableObjects = beatmap.HitObjects.Where(h => h is not BeatmapEvent).ToArray();
+            for (int i = 1; i < playableObjects.Length; i++)
             {
-                objects.Add(new OsuDifficultyHitObject(beatmap.HitObjects[i], beatmap.HitObjects[i - 1], clockRate, objects, objects.Count));
+                objects.Add(new OsuDifficultyHitObject(playableObjects[i], playableObjects[i - 1], clockRate, objects, objects.Count));
             }
 
             return objects;

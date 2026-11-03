@@ -2,6 +2,11 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Globalization;
+using System.IO;
+using System.Text;
+using osu.Game.IO;
+using osu.Game.IO.Serialization;
+using Newtonsoft.Json;
 using osu.Game.Beatmaps.Formats;
 
 namespace osu.Game.Skinning
@@ -11,6 +16,21 @@ namespace osu.Game.Skinning
         public LegacySkinDecoder()
             : base(1)
         {
+        }
+
+        protected override void ParseStreamInto(LineBufferedReader stream, SkinConfiguration output)
+        {
+            if (stream.PeekLine()?.Trim() != VibBeatmapEncoder.MAGIC)
+            {
+                base.ParseStreamInto(stream, output);
+                return;
+            }
+            stream.ReadLine();
+            var document = JsonConvert.DeserializeObject<VibDocument>(stream.ReadToEnd(), JsonSerializableExtensions.CreateGlobalSettings())
+                ?? throw new InvalidDataException("Missing native beatmap data.");
+            using var payload = new MemoryStream(Encoding.UTF8.GetBytes(document.Legacy));
+            using var reader = new LineBufferedReader(payload);
+            base.ParseStreamInto(reader, output);
         }
 
         protected override void ParseLine(SkinConfiguration skin, Section section, string line)

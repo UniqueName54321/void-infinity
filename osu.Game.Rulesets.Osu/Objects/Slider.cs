@@ -23,9 +23,9 @@ using osu.Game.Rulesets.Scoring;
 
 namespace osu.Game.Rulesets.Osu.Objects
 {
-    public class Slider : OsuHitObject, IHasPathWithRepeats, IHasSliderVelocity, IHasGenerateTicks
+    public class Slider : OsuHitObject, IHasVariablePath, IHasSliderVelocity, IHasGenerateTicks
     {
-        public double EndTime => StartTime + this.SpanCount() * Path.Distance / Velocity;
+        public double EndTime => StartTime + this.SpanCount() * Path.Distance / Velocity * VelocityProfile.DurationMultiplier;
 
         [JsonIgnore]
         public double Duration
@@ -38,7 +38,7 @@ namespace osu.Game.Rulesets.Osu.Objects
 
         private readonly Cached<Vector2> endPositionCache = new Cached<Vector2>();
 
-        public override Vector2 EndPosition => endPositionCache.IsValid ? endPositionCache.Value : endPositionCache.Value = Position + this.CurvePositionAt(1);
+        public override Vector2 EndPosition => endPositionCache.IsValid ? endPositionCache.Value : endPositionCache.Value = Position + CurvePositionAt(1);
 
         public Vector2 StackedPositionAt(double t) => StackedPosition + this.CurvePositionAt(t);
 
@@ -50,11 +50,46 @@ namespace osu.Game.Rulesets.Osu.Objects
             set
             {
                 path.ControlPoints.Clear();
-                path.ControlPoints.AddRange(value.ControlPoints.Select(c => new PathControlPoint(c.Position, c.Type)));
+                path.ControlPoints.AddRange(value.ControlPoints.Select(c => c.Clone()));
 
                 path.ExpectedDistance.Value = value.ExpectedDistance.Value;
             }
         }
+
+        private readonly Cached<SliderVelocityProfile> velocityProfile = new Cached<SliderVelocityProfile>();
+        public SliderVelocityProfile VelocityProfile => velocityProfile.IsValid ? velocityProfile.Value
+            : velocityProfile.Value = new SliderVelocityProfile(Path.ControlPoints.ToArray());
+
+        private readonly SliderPath movingPath = new SliderPath { OptimiseCatmull = true };
+        private double lastMovementProgress = double.NaN;
+        public bool HasMovement => Path.ControlPoints.Any(c => c.Movement != Vector2.Zero);
+
+        public SliderPath PathAt(double completionProgress)
+        {
+            if (!HasMovement) return Path;
+            completionProgress = System.Math.Clamp(completionProgress, 0, 1);
+            if (lastMovementProgress == completionProgress) return movingPath;
+            lastMovementProgress = completionProgress;
+            movingPath.ControlPoints.Clear();
+            movingPath.ControlPoints.AddRange(Path.ControlPoints.Select(c => new PathControlPoint(c.Position + c.Movement * (float)completionProgress, c.Type)));
+            // Preserve the authored trim/extension fraction while the geometry changes.
+            movingPath.ExpectedDistance.Value = Path.CalculatedDistance > 0
+                ? movingPath.CalculatedDistance * Path.Distance / Path.CalculatedDistance
+                : Path.ExpectedDistance.Value;
+            return movingPath;
+        }
+
+        public double PathProgressAt(double completionProgress)
+        {
+            completionProgress = System.Math.Clamp(completionProgress, 0, 1);
+            if (completionProgress == 1) return this.SpanCount() % 2;
+            double spans = completionProgress * this.SpanCount();
+            int span = (int)spans;
+            double time = spans - span;
+            return span % 2 == 0 ? VelocityProfile.ProgressAt(time) : VelocityProfile.ProgressAt(1 - time);
+        }
+
+        public Vector2 CurvePositionAt(double completionProgress) => PathAt(completionProgress).PositionAt(PathProgressAt(completionProgress));
 
         public double Distance => Path.Distance;
 
@@ -152,7 +187,12 @@ namespace osu.Game.Rulesets.Osu.Objects
         public Slider()
         {
             SamplesBindable.CollectionChanged += (_, _) => UpdateNestedSamples();
-            Path.Version.ValueChanged += _ => updateNestedPositions();
+            Path.Version.ValueChanged += _ =>
+            {
+                velocityProfile.Invalidate();
+                lastMovementProgress = double.NaN;
+                updateNestedPositions();
+            };
         }
 
         protected override void ApplyDefaultsToSelf(ControlPointInfo controlPointInfo, IBeatmapDifficultyInfo difficulty)
@@ -184,7 +224,7 @@ namespace osu.Game.Rulesets.Osu.Objects
                         {
                             SpanIndex = e.SpanIndex,
                             SpanStartTime = e.SpanStartTime,
-                            StartTime = e.Time,
+                            StartTime = e.SpanStartTime + (e.SpanIndex % 2 == 0 ? VelocityProfile.TimeAt(e.PathProgress) : 1 - VelocityProfile.TimeAt(e.PathProgress)) * SpanDuration,
                             Position = Position + Path.PositionAt(e.PathProgress),
                             PathProgress = e.PathProgress,
                             StackHeight = StackHeight,

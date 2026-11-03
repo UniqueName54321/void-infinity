@@ -383,7 +383,7 @@ namespace osu.Game.Beatmaps.Formats
             if (beatmap.HitObjects.Count == 0)
                 return;
 
-            foreach (var h in beatmap.HitObjects)
+            foreach (var h in beatmap.HitObjects.Where(h => h is not IHasBeatmapEvent))
                 handleHitObject(writer, h);
         }
 

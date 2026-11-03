@@ -30,9 +30,9 @@ namespace osu.Game.Beatmaps
     /// </summary>
     public class BeatmapImporter : RealmArchiveModelImporter<BeatmapSetInfo>
     {
-        public override IEnumerable<string> HandledExtensions => new[] { ".osz", ".olz" };
+        public override IEnumerable<string> HandledExtensions => new[] { ".osz", ".olz", ".vibz", ".vib" };
 
-        protected override string[] HashableFileTypes => new[] { ".osu" };
+        protected override string[] HashableFileTypes => new[] { ".osu", ".vib" };
 
         public ProcessBeatmapDelegate? ProcessBeatmap { private get; set; }
 
@@ -306,7 +306,7 @@ namespace osu.Game.Beatmaps
         protected override BeatmapSetInfo? CreateModel(ArchiveReader reader, ImportParameters parameters)
         {
             // let's make sure there are actually .osu files to import.
-            string? mapName = reader.Filenames.FirstOrDefault(f => f.EndsWith(".osu", StringComparison.OrdinalIgnoreCase));
+            string? mapName = reader.Filenames.FirstOrDefault(f => (f.EndsWith(".osu", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".vib", StringComparison.OrdinalIgnoreCase)));
 
             if (string.IsNullOrEmpty(mapName))
             {
@@ -344,7 +344,7 @@ namespace osu.Game.Beatmaps
 
             if (reader is DirectoryArchiveReader legacyReader)
             {
-                var beatmaps = reader.Filenames.Where(f => f.EndsWith(".osu", StringComparison.OrdinalIgnoreCase));
+                var beatmaps = reader.Filenames.Where(f => (f.EndsWith(".osu", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".vib", StringComparison.OrdinalIgnoreCase)));
 
                 dateAdded = File.GetLastWriteTimeUtc(legacyReader.GetFullPath(beatmaps.First()));
 
@@ -371,7 +371,7 @@ namespace osu.Game.Beatmaps
             // the logic that achieves this is very difficult to make sense of, but appears to be located somewhere around
             // https://github.com/peppy/osu-stable-reference/blob/67795dba3c308e7d0493b296149dcb073ca47ecb/osu!/GameplayElements/Beatmaps/BeatmapManager.cs#L207-L208
             // only testing the `/` path separator character is sufficient as `RealmNamedFileUsage`s are normalised to use the front slash unix path separator convention
-            foreach (var file in beatmapSet.Files.Where(f => !f.Filename.Contains('/') && f.Filename.EndsWith(@".osu", StringComparison.OrdinalIgnoreCase)))
+            foreach (var file in beatmapSet.Files.Where(f => !f.Filename.Contains('/') && (f.Filename.EndsWith(@".osu", StringComparison.OrdinalIgnoreCase) || f.Filename.EndsWith(".vib", StringComparison.OrdinalIgnoreCase))))
             {
                 using (var memoryStream = new MemoryStream(Files.Store.Get(file.File.GetStoragePath()))) // we need a memory stream so we can seek
                 {

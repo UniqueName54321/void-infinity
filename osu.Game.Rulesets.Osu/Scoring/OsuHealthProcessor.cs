@@ -2,6 +2,8 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Linq;
+using osu.Game.Rulesets.Objects;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Objects.Types;
@@ -20,8 +22,36 @@ namespace osu.Game.Rulesets.Osu.Scoring
         {
         }
 
+        private BeatmapAttributeTimeline? attributeTimeline;
+        private double[] attributeEventTimes = Array.Empty<double>();
+
+        public override void ApplyBeatmap(IBeatmap beatmap)
+        {
+            attributeTimeline = new BeatmapAttributeTimeline(beatmap);
+            attributeEventTimes = beatmap.HitObjects.Where(h => h is IHasBeatmapEvent).Select(h => h.StartTime).Distinct().Order().ToArray();
+            base.ApplyBeatmap(beatmap);
+        }
+
+        protected override double GetDrainAmount(double startTime, double endTime)
+        {
+            if (attributeTimeline == null || attributeEventTimes.Length == 0)
+                return base.GetDrainAmount(startTime, endTime);
+            double baseline = 1 - IBeatmapDifficultyInfo.DifficultyRange(Beatmap.Difficulty.DrainRate, 0.99, 0.9, 0.4);
+            double amount = 0;
+            double start = startTime;
+            foreach (double boundary in attributeEventTimes.Where(t => t > startTime && t < endTime).Append(endTime))
+            {
+                double target = 1 - IBeatmapDifficultyInfo.DifficultyRange(attributeTimeline.At(start).DrainRate, 0.99, 0.9, 0.4);
+                amount += DrainRate * (boundary - start) * target / baseline;
+                start = boundary;
+            }
+            return amount;
+        }
+
         protected override double GetHealthIncreaseFor(JudgementResult result)
         {
+            if (result.HitObject is IHasBeatmapEvent) return 0;
+
             if (IsSimulating)
                 return getHealthIncreaseFor(result);
 
@@ -79,13 +109,13 @@ namespace osu.Game.Rulesets.Osu.Scoring
             switch (result.Type)
             {
                 case HitResult.SmallTickMiss:
-                    return IBeatmapDifficultyInfo.DifficultyRange(Beatmap.Difficulty.DrainRate, -0.02, -0.075, -0.14);
+                    return IBeatmapDifficultyInfo.DifficultyRange((attributeTimeline?.At(result.HitObject.StartTime) ?? Beatmap.Difficulty).DrainRate, -0.02, -0.075, -0.14);
 
                 case HitResult.LargeTickMiss:
-                    return IBeatmapDifficultyInfo.DifficultyRange(Beatmap.Difficulty.DrainRate, -0.02, -0.075, -0.14);
+                    return IBeatmapDifficultyInfo.DifficultyRange((attributeTimeline?.At(result.HitObject.StartTime) ?? Beatmap.Difficulty).DrainRate, -0.02, -0.075, -0.14);
 
                 case HitResult.Miss:
-                    return IBeatmapDifficultyInfo.DifficultyRange(Beatmap.Difficulty.DrainRate, -0.03, -0.125, -0.2);
+                    return IBeatmapDifficultyInfo.DifficultyRange((attributeTimeline?.At(result.HitObject.StartTime) ?? Beatmap.Difficulty).DrainRate, -0.03, -0.125, -0.2);
 
                 case HitResult.SmallTickHit:
                     // When classic slider mechanics are enabled, this result comes from the tail.
