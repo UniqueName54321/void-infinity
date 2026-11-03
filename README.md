@@ -47,6 +47,7 @@ and that's it! if everything went well, void!infinity should now be running.
 
 - void!infinity is a wip. as such, expect bugs, crashes, and other instabilities.
 - void!infinity has only been tested on Linux, specifically Manjaro. other operating systems may work, but there are no guarantees.
+- **void!infinity is not fully offline yet.** although steps have been taken to disable connections to the official osu! servers, some network requests may still occur. until this has been properly addressed and tested, i'd recommend blocking the game's internet access using a firewall or other network restrictions.
 - void!infinity is not affiliated with or endorsed by the official osu! project.
 - the current development build may share data directories with osu! development builds. keep backups of any important game data.
-- some dependencies currently have known security vulnerabilities. these will need to be addressed before a stable release.
+- some dependencies currently have known security vulnerabilities. while these don't necessarily mean void!infinity itself is exploitable, they should be addressed before a stable release.
