@@ -1,92 +1,136 @@
-# Contributing Guidelines
+# contributing to void!infinity
 
-Thank you for showing interest in the development of void!infinity. We aim to provide a good collaborating environment for everyone involved, and as such have decided to list some of the most important things to keep in mind in the process. The guidelines below have been chosen based on past experience.
+first off, thanks for showing interest in contributing to void!infinity!
 
-## Table of contents
+void!infinity is a fork of *osu!lazer* that aims to give players and beatmap creators more freedom. we're especially interested in experimental features, removing unnecessary limitations, and generally allowing things that wouldn't normally be possible in osu!.
 
-1. [Reporting bugs](#reporting-bugs)
-2. [Providing general feedback](#providing-general-feedback)
-3. [Issue or discussion?](#issue-or-discussion)
-4. [Submitting pull requests](#submitting-pull-requests)
-5. [Resources](#resources)
+contributions are welcome, regardless of your experience level or whether you use AI tools!
 
-## Reporting bugs
+## table of contents
 
-A **bug** is a situation in which there is something clearly *and objectively* wrong with the game. Examples of applicable bug reports are:
+1. [reporting bugs](#reporting-bugs)
+2. [suggesting features](#suggesting-features)
+3. [submitting pull requests](#submitting-pull-requests)
+4. [AI-assisted contributions](#ai-assisted-contributions)
+5. [development guidelines](#development-guidelines)
+6. [important notes](#important-notes)
 
-- The game crashes to desktop when I start a beatmap
-- Friends appear twice in the friend listing
-- The game slows down a lot when I play this specific map
-- A piece of text is overlapping another piece of text on the screen
+## reporting bugs
 
-To track bug reports, we primarily use GitHub **issues**. When opening an issue, please keep in mind the following:
+found something broken? feel free to open an issue!
 
-- Before opening the issue, please search for any similar existing issues using the text search bar and the issue labels. This includes both open and closed issues (we may have already fixed something, but the fix hasn't yet been released).
-- When opening the issue, please fill out as much of the issue template as you can. In particular, please make sure to include logs and screenshots as much as possible. The instructions on how to find the log files are included in the issue template.
-- We may ask you for follow-up information to reproduce or debug the problem. Please look out for this and provide follow-up info if we request it.
+before doing so, please check whether someone else has already reported the same problem.
 
-If we cannot reproduce the issue, it is deemed low priority, or it is deemed to be specific to your setup in some way, the issue may be downgraded to a discussion. This will be done by a maintainer for you.
+when reporting bugs, try to include:
 
-## Providing general feedback
+- what went wrong
+- what you expected to happen
+- steps to reproduce the problem
+- your operating system and any relevant hardware information
+- logs or screenshots, if applicable
 
-If you wish to:
+please make sure any logs or screenshots don't contain sensitive information before uploading them.
 
-- provide *subjective* feedback on the game (about how the UI looks, about how the default skin works, about game mechanics, about how the PP and scoring systems work, etc.),
-- suggest a new feature to be added to the game,
-- report a non-specific problem with the game that you think may be connected to your hardware or operating system specifically,
+you don't need to know exactly *why* something broke. that's what debugging is for!
 
-then it is generally best to start with a **discussion** first. Discussions are a good avenue to group subjective feedback on a single topic, or gauge interest in a particular feature request.
+## suggesting features
 
-When opening a discussion, please keep in mind the following:
+have an idea for something that could make void!infinity better? feel free to suggest it!
 
-- Use the search function to see if your idea has been proposed before, or if there is already a thread about a particular issue you wish to raise.
-- If proposing a feature, please try to explain the feature in as much detail as possible.
-- If you're reporting a non-specific problem, please provide applicable logs, screenshots, or video that illustrate the issue.
+experimental and unconventional ideas are especially welcome, even if they would be considered unsuitable for regular osu!.
 
-If a discussion gathers enough traction, then it may be converted into an issue. This will be done by a maintainer for you.
+however, keep in mind that suggesting a feature doesn't guarantee it'll be implemented.
 
-## Issue or discussion?
+if possible, explain what your idea does, why it might be useful (or just fun!), and how you imagine it working.
 
-We realise that the line between an issue and a discussion may be fuzzy, so while we ask you to use your best judgement based on the description above, please don't think about it too hard either. Feedback in a slightly wrong place is better than no feedback at all.
+## submitting pull requests
 
-When in doubt, it's probably best to start with a discussion first. We will escalate to issues as needed.
+pull requests are welcome!
 
-## Submitting pull requests
+before submitting one, please keep the following in mind:
 
-While pull requests from unaffiliated contributors are welcome, please note that due to significant community interest and limited review throughput, the core team's primary focus is on the issues which are currently [on the roadmap](https://github.com/orgs/ppy/projects/7/views/6). Reviewing PRs that fall outside of the scope of the roadmap is done on a best-effort basis, so please be aware that it may take a while before a core maintainer gets around to review your change.
+- try to keep your changes focused on one feature or problem at a time.
+- explain what your changes do and why you made them.
+- test your changes before submitting them, where practical.
+- don't intentionally introduce malware, backdoors, security vulnerabilities, or other harmful functionality.
+- for major changes, consider opening an issue first so the idea can be discussed.
+- make sure your changes don't introduce unintended connections to official osu! servers.
+- don't worry if your code isn't perfect! feedback and revisions are a normal part of development.
 
-The [issue tracker](https://github.com/ppy/osu/issues) should provide plenty of issues to start with. We also have a [`good first issue`](https://github.com/ppy/osu/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) label, although from experience it is not used very often, as it is relatively rare that we can spot an issue that will definitively be a good first issue for a new contributor regardless of their programming experience.
+pull requests will be reviewed based on their usefulness, correctness, maintainability, and compatibility with the project's goals.
 
-In the case of simple issues, a direct PR is okay. However, if you decide to work on an existing issue which doesn't seem trivial, **please ask us first**. This way we can try to estimate if it is a good fit for you and provide the correct direction on how to address it. In addition, note that while we do not rule out external contributors from working on roadmapped issues, we will generally prefer to handle them ourselves unless they're not very time sensitive.
+## AI-assisted contributions
 
-If you'd like to propose a subjective change to one of the visual aspects of the game, or there is a bigger task you'd like to work on, but there is no corresponding issue or discussion thread yet for it, **please open a discussion or issue first** to avoid wasted effort. This in particular applies if you want to work on [one of the available designs from the void!infinity Figma master library](https://www.figma.com/file/VIkXMYNPMtQem2RJg9k2iQ/Master-Library).
+**AI-assisted contributions are allowed and welcome!**
 
-Aside from the above, below is a brief checklist of things to watch out when you're preparing your code changes:
+unlike upstream osu!, void!infinity does not prohibit contributions made with or assisted by AI or large language models (LLMs).
 
-- Make sure you're comfortable with the principles of object-oriented programming, the syntax of C\# and your development environment.
-- Make sure you are familiar with [git](https://git-scm.com/) and [the pull request workflow](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/proposing-changes-to-your-work-with-pull-requests).
-- Please do not make code changes via the GitHub web interface.
-- Please add tests for your changes. We expect most new features and bugfixes to have test coverage, unless the effort of adding them is prohibitive. The visual testing methodology we use is described in more detail [here](https://github.com/ppy/osu-framework/wiki/Development-and-Testing).
-- Please run tests and code style analysis (via `InspectCode.{ps1,sh}` scripts in the root of this repository) before opening the PR. This is particularly important if you're a first-time contributor, as CI will not run for your PR until we allow it to do so.
-- **Do not run the game in release configuration at any point during your testing** (the sole exception to this being benchmarks). Using release is an unnecessary and harmful practice, and can even lead to you losing your local realm database if you start making changes to the schema. The debug configuration has a completely separated full-stack environment, including a development website instance at https://dev.ppy.sh/. It is permitted to register an account on that development instance for testing purposes and not worry about multi-accounting infractions.
+you're welcome to use AI for things like:
 
-After you're done with your changes and you wish to open the PR, please observe the following recommendations:
+- writing or modifying code
+- debugging and troubleshooting
+- writing documentation
+- generating tests
+- understanding unfamiliar parts of the codebase
+- implementing features
 
-- Please submit the pull request from a [topic branch](https://git-scm.com/book/en/v2/Git-Branching-Branching-Workflows#_topic_branch) (not `master`), and keep the *Allow edits from maintainers* check box selected, so that we can push fixes to your PR if necessary.
-- Please pick the following target branch for your pull request:
-    - `pp-dev`, if the change impacts star rating or performance points calculations for any of the rulesets,
-    - `master`, otherwise.
-- Please avoid pushing untested or incomplete code.
-- Please do not force-push or rebase unless we ask you to.
-- Please do not merge `master` continually if there are no conflicts to resolve. We will do this for you when the change is ready for merge.
+in fact, void!infinity only got to the state it's at currently thanks to AI work.
 
-We are highly committed to quality when it comes to the void!infinity project. This means that contributions from less experienced community members can take multiple rounds of review to get to a mergeable state. We try our utmost best to never conflate a person with the code they authored, and to keep the discussion focused on the code at all times. Please consider our comments and requests a learning experience.
+however, there are still a few things to keep in mind:
 
-If you're uncertain about some part of the codebase or some inner workings of the game and framework, please reach out either by leaving a comment in the relevant issue, discussion, or PR thread, or by posting a message in the [development Discord server](https://discord.gg/ppy). We will try to help you as much as we can.
+- **you're responsible for what you submit.** using AI doesn't excuse broken, unsafe, or otherwise unsuitable code.
+- please disclose significant AI involvement in your pull request, including which tools you used.
+- review and test AI-generated changes before submitting them.
+- make sure any submitted code can legally be included in the project.
+- don't submit large amounts of unreviewed AI-generated code just for the sake of contributing.
 
-## Resources
+AI-generated and human-written contributions are held to the same quality standards.
 
-- [Development roadmap](https://github.com/orgs/ppy/projects/7/views/6): What the core team is currently working on
-- [`ppy/osu-framework` wiki](https://github.com/ppy/osu-framework/wiki): Contains introductory information about void!infinityframework, the bespoke 2D game framework we use for the game
-- [`ppy/osu` wiki](https://github.com/ppy/osu/wiki): Contains articles about various technical aspects of the game
-- [Figma master library](https://www.figma.com/file/VIkXMYNPMtQem2RJg9k2iQ/Master-Library): Contains finished and draft designs for void!infinity
+## development guidelines
+
+void!infinity currently uses an older version of *osu!lazer* as its foundation, specifically `2026.112.0-tachyon`.
+
+the project is primarily developed and tested on Manjaro Linux, although contributions improving support for other operating systems are welcome.
+
+to build the game, follow the instructions in the [README](README.md).
+
+when developing:
+
+- use the Debug configuration for ordinary development and testing.
+- avoid making unnecessary changes to existing osu! components unless they're relevant to your work.
+- preserve existing functionality where practical.
+- add or update tests for changes that benefit from automated testing.
+- don't assume that a feature should follow osu!'s restrictions just because that's how upstream implements it.
+- avoid adding unnecessary dependencies, especially ones with known security vulnerabilities.
+
+## important notes
+
+### offline functionality
+
+void!infinity aims to operate independently of official osu! servers.
+
+offline functionality is still being developed, so some network requests may remain.
+
+**do not test modified gameplay, authentication, or score submission against official osu! servers.**
+
+### compatibility with upstream
+
+void!infinity is an independent fork of osu!lazer.
+
+we don't guarantee compatibility with newer upstream versions, and there are no plans to automatically merge every upstream update.
+
+changes should be designed around void!infinity's own goals rather than maintaining compatibility at all costs.
+
+### licences and attribution
+
+void!infinity is based on open-source software developed by the osu! team and other contributors.
+
+please respect the applicable software licences, copyright notices, and third-party asset restrictions when submitting contributions.
+
+## and finally...
+
+void!infinity is still a work in progress, and there's plenty left to figure out.
+
+whether you're fixing a typo, reporting a bug, implementing a new feature, or trying to make something completely ridiculous possible, contributions are appreciated!
+
+have fun!
