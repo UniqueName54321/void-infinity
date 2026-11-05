@@ -2,8 +2,10 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using osu.Framework;
+using System.Collections.Generic;
+using System.Globalization;
 using osu.Framework.Bindables;
+using osu.Framework;
 using osu.Framework.Configuration;
 using osu.Framework.Configuration.Tracking;
 using osu.Framework.Extensions;
@@ -29,6 +31,86 @@ namespace osu.Game.Configuration
 {
     public class OsuConfigManager : IniConfigManager<OsuSetting>, IGameplaySettings
     {
+        public string SettingsFilename => Filename;
+
+        private static readonly HashSet<OsuSetting> importable_preferences = new HashSet<OsuSetting>
+        {
+            OsuSetting.MenuTips,
+            OsuSetting.MenuVoice,
+            OsuSetting.MenuMusic,
+            OsuSetting.ShowFpsDisplay,
+            OsuSetting.ShowStoryboard,
+            OsuSetting.BeatmapSkins,
+            OsuSetting.BeatmapColours,
+            OsuSetting.BeatmapHitsounds,
+            OsuSetting.CursorRotation,
+            OsuSetting.MenuParallax,
+            OsuSetting.Prefer24HourTime,
+            OsuSetting.KeyOverlay,
+            OsuSetting.ReplaySettingsOverlay,
+            OsuSetting.ReplayPlaybackControlsExpanded,
+            OsuSetting.GameplayLeaderboard,
+            OsuSetting.ShowHealthDisplayWhenCantFail,
+            OsuSetting.FadePlayfieldWhenHealthLow,
+            OsuSetting.AlwaysPlayFirstComboBreak,
+            OsuSetting.LightenDuringBreaks,
+            OsuSetting.HitLighting,
+            OsuSetting.StarFountains,
+            OsuSetting.HideCountryFlags,
+            OsuSetting.ShowConvertedBeatmaps,
+            OsuSetting.EditorShowHitMarkers,
+            OsuSetting.EditorAutoSeekOnPlacement,
+            OsuSetting.EditorLimitedDistanceSnap,
+            OsuSetting.EditorShowSpeedChanges,
+            OsuSetting.EditorShowStoryboard,
+            OsuSetting.DimLevel,
+            OsuSetting.BlurLevel,
+            OsuSetting.EditorDim,
+            OsuSetting.EditorWaveformOpacity,
+            OsuSetting.UIHoldActivationDelay,
+            OsuSetting.UIScale,
+            OsuSetting.MenuCursorSize,
+            OsuSetting.GameplayCursorSize,
+            OsuSetting.AutoCursorSize,
+            OsuSetting.MouseDisableButtons,
+            OsuSetting.MouseDisableWheel,
+            OsuSetting.TouchDisableGameplayTaps,
+            OsuSetting.PositionalHitsoundsLevel,
+            OsuSetting.AudioOffset,
+            OsuSetting.VolumeInactive,
+            OsuSetting.MenuBackgroundSource,
+            OsuSetting.IntroSequence,
+            OsuSetting.HUDVisibilityMode,
+            OsuSetting.ScoreDisplayMode,
+        };
+
+        /// <summary>Imports supported local preferences only. Call on the update thread because changes can update UI.</summary>
+        public int ImportLocalPreferences(IEnumerable<string> lines)
+        {
+            int imported = 0;
+            foreach (string line in lines)
+            {
+                int separator = line.IndexOf('=');
+                if (separator < 1 || !Enum.TryParse(line[..separator].Trim(), out OsuSetting setting) || !importable_preferences.Contains(setting))
+                    continue;
+                string value = line[(separator + 1)..].Trim();
+                if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out double number) && !double.IsFinite(number))
+                    continue;
+                if (!ConfigStore.TryGetValue(setting, out var bindable) || bindable is not IParseable parseable)
+                    continue;
+                try
+                {
+                    parseable.Parse(value, CultureInfo.InvariantCulture);
+                    imported++;
+                }
+                catch (Exception ex) when (ex is ArgumentException || ex is FormatException || ex is OverflowException)
+                {
+                    // Other client versions may store a setting differently. Leave unsupported values alone.
+                }
+            }
+            return imported;
+        }
+
         public OsuConfigManager(Storage storage)
             : base(storage)
         {
@@ -167,6 +249,8 @@ namespace osu.Game.Configuration
 
             SetDefault(OsuSetting.Version, string.Empty);
 
+            SetDefault(OsuSetting.EnableExperimentalFeatures, false);
+            SetDefault(OsuSetting.ExperimentalTest, false);
             SetDefault(OsuSetting.ShowFirstRunSetup, true);
             SetDefault(OsuSetting.ShowMobileDisclaimer, RuntimeInfo.IsMobile);
 
@@ -433,6 +517,8 @@ namespace osu.Game.Configuration
         UIHoldActivationDelay,
         HitLighting,
         StarFountains,
+        EnableExperimentalFeatures,
+        ExperimentalTest,
         MenuBackgroundSource,
         GameplayDisableWinKey,
         SeasonalBackgroundMode,

@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -40,6 +40,7 @@ namespace osu.Game.Rulesets.Taiko.Mods
             var taikoBeatmap = (TaikoBeatmap)beatmap;
             var controlPointInfo = taikoBeatmap.ControlPointInfo;
 
+            osu.Game.Rulesets.Objects.MultitapUtils.ReplaceWithStreams(taikoBeatmap, useNestedObjects: true);
             Hit[] hits = taikoBeatmap.HitObjects.OfType<Hit>().ToArray();
 
             if (hits.Length == 0)

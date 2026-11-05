@@ -1,7 +1,14 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Linq;
+using osu.Framework.Extensions;
 using osu.Framework.Allocation;
+using osu.Framework.Graphics.Cursor;
+using osu.Framework.Graphics.UserInterface;
+using osu.Game.Graphics.UserInterface;
+using osu.Game.Rulesets.Objects;
+using osu.Game.Screens.Edit;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Primitives;
@@ -9,13 +16,40 @@ using osu.Game.Configuration;
 using osu.Game.Rulesets.Osu.Edit.Blueprints.HitCircles.Components;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
+using osu.Game.Screens.Edit.Components;
 using osuTK;
 
 namespace osu.Game.Rulesets.Osu.Edit.Blueprints.HitCircles
 {
-    public partial class HitCircleSelectionBlueprint : OsuSelectionBlueprint<HitCircle>
+    public partial class HitCircleSelectionBlueprint : OsuSelectionBlueprint<HitCircle>, IHasPopover
     {
-        protected new DrawableHitCircle DrawableObject => (DrawableHitCircle)base.DrawableObject;
+        [Resolved]
+        private EditorBeatmap? editorBeatmap { get; set; }
+
+        public override MenuItem[] ContextMenuItems => new MenuItem[]
+        {
+            new OsuMenuItem("Configure multitap", MenuItemType.Standard, () => this.ShowPopover()),
+        };
+
+        public Popover GetPopover() => new MultitapPopover(HitObject.Multitap ?? new MultitapSettings
+        {
+            BeatsPerBar = editorBeatmap?.ControlPointInfo.TimingPointAt(HitObject.StartTime).TimeSignature.Numerator ?? 4,
+        }, settings =>
+        {
+            if (editorBeatmap == null || !editorBeatmap.HitObjects.Contains(HitObject)) return;
+            HitCircle replacement = settings.Count == 1 ? new HitCircle() : new MultitapCircle { Multitap = settings };
+            replacement.StartTime = HitObject.StartTime;
+            replacement.Position = HitObject.Position;
+            replacement.NewCombo = HitObject.NewCombo;
+            replacement.ComboOffset = HitObject.ComboOffset;
+            replacement.Samples = HitObject.Samples;
+            editorBeatmap.BeginChange();
+            editorBeatmap.Remove(HitObject);
+            editorBeatmap.Add(replacement);
+            editorBeatmap.SelectedHitObjects.Clear();
+            editorBeatmap.SelectedHitObjects.Add(replacement);
+            editorBeatmap.EndChange();
+        });
 
         protected readonly HitCirclePiece CirclePiece;
         private readonly HitCircleOverlapMarker marker;
@@ -44,7 +78,7 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.HitCircles
             showHitMarkers.BindValueChanged(_ =>
             {
                 if (!showHitMarkers.Value)
-                    DrawableObject.RestoreHitAnimations();
+                    (DrawableObject as DrawableHitCircle)?.RestoreHitAnimations();
             });
         }
 
@@ -56,10 +90,10 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.HitCircles
             marker.UpdateFrom(HitObject);
 
             if (showHitMarkers.Value)
-                DrawableObject.SuppressHitAnimations();
+                (DrawableObject as DrawableHitCircle)?.SuppressHitAnimations();
         }
 
-        public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => DrawableObject.HitArea.ReceivePositionalInputAt(screenSpacePos);
+        public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => CirclePiece.ReceivePositionalInputAt(screenSpacePos);
 
         public override Quad SelectionQuad => CirclePiece.ScreenSpaceDrawQuad;
     }

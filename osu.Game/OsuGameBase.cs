@@ -382,7 +382,8 @@ namespace osu.Game
             base.Content.Add(LeaderboardManager);
 
             // add api components to hierarchy.
-            if (API is Component apiComponent)
+            // Injected providers may already be owned and updated by the surrounding host (for example, in tests).
+            if (API is Component { Parent: null } apiComponent)
                 base.Content.Add(apiComponent);
 
             base.Content.Add(SpectatorClient);

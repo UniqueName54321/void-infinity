@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -14,7 +14,7 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
     {
         public override IEnumerable<BeatmapStatistic> GetStatistics()
         {
-            int circles = HitObjects.Count(c => c is HitCircle);
+            int circles = HitObjects.Sum(c => c is MultitapCircle m ? m.Multitap.Count : c is HitCircle ? 1 : 0);
             int sliders = HitObjects.Count(s => s is Slider);
             int spinners = HitObjects.Count(s => s is Spinner);
             int sum = Math.Max(1, circles + sliders);

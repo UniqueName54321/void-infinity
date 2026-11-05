@@ -25,6 +25,7 @@ namespace osu.Game.Overlays.Settings.Sections
             {
                 new GeneralSettings(),
                 new BeatmapSettings(),
+                new LazerImportSettings(),
                 new SkinSettings(),
                 new CollectionsSettings(),
                 new ScoreSettings(),

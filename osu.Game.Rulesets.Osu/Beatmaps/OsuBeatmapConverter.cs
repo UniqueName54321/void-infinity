@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using osuTK;
@@ -23,6 +23,13 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
         }
 
         protected override bool SupportsBeatmapEvents => true;
+        protected override OsuHitObject ConvertMultitap(HitObject original, IBeatmap beatmap) => new MultitapCircle
+        {
+            StartTime = original.StartTime, Samples = original.Samples, Multitap = original.Multitap,
+            Position = (original as IHasPosition)?.Position ?? Vector2.Zero,
+            NewCombo = (original as IHasCombo)?.NewCombo ?? false,
+            ComboOffset = (original as IHasCombo)?.ComboOffset ?? 0,
+        };
 
         public override bool CanConvert() => Beatmap.HitObjects.All(h => h is IHasPosition);
 
@@ -37,6 +44,15 @@ namespace osu.Game.Rulesets.Osu.Beatmaps
             {
                 case IHasBeatmapEvent e:
                     return new BeatmapEvent { StartTime = original.StartTime, Position = positionData?.Position ?? Vector2.Zero, Change = e.Change }.Yield();
+
+                case HitObject h when h.Multitap != null:
+                    return new MultitapCircle
+                    {
+                        StartTime = original.StartTime, Samples = original.Samples,
+                        Position = positionData?.Position ?? Vector2.Zero,
+                        NewCombo = comboData?.NewCombo ?? false, ComboOffset = comboData?.ComboOffset ?? 0,
+                        Multitap = h.Multitap,
+                    }.Yield();
 
                 case IHasPathWithRepeats curveData:
                     return new Slider

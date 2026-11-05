@@ -61,7 +61,7 @@ namespace osu.Game.Rulesets.Mods
             {
                 foreach (var h in hitObjects)
                 {
-                    if (IsFirstAdjustableObject(h))
+                    if (h is not IHasMultitap && IsFirstAdjustableObject(h))
                         return h;
 
                     var nestedResult = getFirstAdjustableObjectRecursive(h.NestedHitObjects);
@@ -77,6 +77,8 @@ namespace osu.Game.Rulesets.Mods
         {
             dho.ApplyCustomUpdateState += (o, state) =>
             {
+                if (o.HitObject is IHasMultitap) return;
+
                 // Increased visibility is applied to the entire first object, including all of its nested hitobjects.
                 if (IncreaseFirstObjectVisibility.Value && isObjectEqualToOrNestedIn(o.HitObject, FirstObject))
                     ApplyIncreasedVisibilityState(o, state);

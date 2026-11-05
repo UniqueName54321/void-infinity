@@ -92,6 +92,17 @@ namespace osu.Game.Rulesets.Osu.Mods
 
                 switch (h)
                 {
+                    case DrawableMultitapCircle multi:
+                        foreach (var tap in multi.NestedHitObjects.OfType<DrawableHitCircle>())
+                        {
+                            if (!tap.Judged && time >= tap.HitObject.StartTime - RELAX_LENIENCY)
+                            {
+                                handleHitCircle(tap);
+                                break;
+                            }
+                        }
+                        break;
+
                     case DrawableHitCircle circle:
                         handleHitCircle(circle);
                         break;

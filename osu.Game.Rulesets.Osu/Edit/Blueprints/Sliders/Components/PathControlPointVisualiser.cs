@@ -64,6 +64,8 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders.Components
             {
                 if (!accept) movementPoint.Movement = originalMovement;
                 movementPoint = null;
+                foreach (var piece in Pieces)
+                    piece.ShowMovement = false;
                 changeHandler?.EndChange();
             }
             editPanel?.Expire();
@@ -124,6 +126,8 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders.Components
             closePanel(false);
             movementPoint = Pieces.First(p => p.IsSelected.Value).ControlPoint;
             originalMovement = movementPoint.Movement;
+            foreach (var piece in Pieces)
+                piece.ShowMovement = piece.ControlPoint == movementPoint;
             changeHandler?.BeginChange();
             showPanel(new OsuSpriteText { Text = "Drag the point to its end position, then Accept.", Font = osu.Game.Graphics.OsuFont.Default.With(size: 14) },
                 new RoundedButton { Text = "Accept", Size = new Vector2(130, 25), Action = () => closePanel(true) },

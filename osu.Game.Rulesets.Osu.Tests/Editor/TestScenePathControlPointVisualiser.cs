@@ -65,6 +65,29 @@ namespace osu.Game.Rulesets.Osu.Tests.Editor
             AddAssert("base point unchanged", () => slider.Path.ControlPoints[1].Position == new Vector2(300, 200));
             AddStep("accept", () => visualiser.ChildrenOfType<RoundedButton>().Single(b => b.Text == "Accept").TriggerClick());
             AddAssert("movement retained", () => slider.Path.ControlPoints[1].Movement.Length, () => Is.EqualTo(64).Within(0.01));
+            AddAssert("marker returns to base point", () => visualiser.Pieces[1].Position == slider.StackedPosition + slider.Path.ControlPoints[1].Position);
+        }
+
+        [Test]
+        public void TestCancelMovementRestoresDestinationAndMarker()
+        {
+            createVisualiser(true);
+            addControlPointStep(new Vector2(200), PathType.LINEAR);
+            addControlPointStep(new Vector2(300, 200));
+            AddStep("set existing movement", () => slider.Path.ControlPoints[1].Movement = new Vector2(0, 20));
+            AddAssert("normal marker at base", () => visualiser.Pieces[1].Position == new Vector2(300, 200));
+            moveMouseToControlPoint(1);
+            AddStep("select point", () => InputManager.Click(MouseButton.Left));
+            AddStep("edit movement", () => visualiser.ContextMenuItems.Single(i => i.Text.Value == "Add movement").Action.Value.Invoke());
+            AddAssert("marker previews destination", () => visualiser.Pieces[1].Position == new Vector2(300, 220));
+            AddStep("move to preview", () => InputManager.MoveMouseTo(visualiser.Pieces[1]));
+            AddStep("begin drag", () => InputManager.PressButton(MouseButton.Left));
+            AddStep("change destination", () => InputManager.MoveMouseTo(visualiser.ToScreenSpace(new Vector2(350, 200))));
+            AddStep("release", () => InputManager.ReleaseButton(MouseButton.Left));
+            AddAssert("movement changed", () => slider.Path.ControlPoints[1].Movement != new Vector2(0, 20));
+            AddStep("cancel", () => visualiser.ChildrenOfType<RoundedButton>().Single(b => b.Text == "Cancel").TriggerClick());
+            AddAssert("old movement restored", () => slider.Path.ControlPoints[1].Movement == new Vector2(0, 20));
+            AddAssert("marker restored", () => visualiser.Pieces[1].Position == new Vector2(300, 200));
         }
 
         [Test]

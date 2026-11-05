@@ -38,6 +38,15 @@ namespace osu.Game.Beatmaps.Formats
                 paths[i].Path.ControlPoints.Clear();
                 paths[i].Path.ControlPoints.AddRange(document.Paths[i]);
             }
+            var seenMultitaps = new System.Collections.Generic.HashSet<int>();
+            foreach (var m in document.Multitaps)
+            {
+                if (m.Index < 0 || m.Index >= output.HitObjects.Count || !seenMultitaps.Add(m.Index) || m.Settings == null
+                    || output.HitObjects[m.Index] is IHasPath or IHasDuration || output.BeatmapInfo.Ruleset.OnlineID is < 0 or > 3)
+                    throw new InvalidDataException("Invalid multitap extension target.");
+                m.Settings.Validate();
+                output.HitObjects[m.Index].Multitap = m.Settings;
+            }
             output.ClampSliderMovement = document.ClampSliderMovement;
             foreach (var e in document.Events)
             {

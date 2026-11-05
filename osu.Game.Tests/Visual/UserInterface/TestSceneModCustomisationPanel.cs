@@ -53,6 +53,23 @@ namespace osu.Game.Tests.Visual.UserInterface
         });
 
         [Test]
+        public void TestAutoplaySettingsForEveryMode()
+        {
+            Mod[] mods = { new OsuModAutoplay(), new osu.Game.Rulesets.Taiko.Mods.TaikoModAutoplay(),
+                new osu.Game.Rulesets.Mania.Mods.ManiaModAutoplay(), new osu.Game.Rulesets.Catch.Mods.CatchModAutoplay() };
+            foreach (var mod in mods)
+            {
+                AddStep($"show {mod.GetType().Name}", () =>
+                {
+                    SelectedMods.Value = new[] { mod };
+                    panel.Enabled.Value = true;
+                    panel.ExpandedState.Value = ModCustomisationPanel.ModCustomisationPanelState.ExpandedByMod;
+                });
+                AddAssert("autoplay has settings", () => content.Children.Any());
+            }
+        }
+
+        [Test]
         public void TestDisplay()
         {
             AddStep("set DT", () =>

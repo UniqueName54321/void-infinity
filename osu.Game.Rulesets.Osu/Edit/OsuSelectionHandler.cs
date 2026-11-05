@@ -282,7 +282,7 @@ namespace osu.Game.Rulesets.Osu.Edit
         /// All osu! hitobjects which can be merged.
         /// </summary>
         private OsuHitObject[] selectedMergeableObjects => SelectedItems.OfType<OsuHitObject>()
-                                                                        .Where(h => h is HitCircle or Slider)
+                                                                        .Where(h => h is not MultitapCircle && h is HitCircle or Slider)
                                                                         .OrderBy(h => h.StartTime)
                                                                         .ToArray();
 
@@ -375,6 +375,20 @@ namespace osu.Game.Rulesets.Osu.Edit
         {
             foreach (var item in base.GetContextMenuItemsForSelection(selection))
                 yield return item;
+
+            var circles = SelectedItems.OfType<HitCircle>().Where(h => h is not MultitapCircle).ToArray();
+            if (circles.Length == SelectedItems.Count && MultitapConversion.FromStream(circles, EditorBeatmap.ControlPointInfo) != null)
+                yield return new OsuMenuItem("Convert stacked stream to multitap", MenuItemType.Standard, () =>
+                {
+                    var multitap = MultitapConversion.FromStream(circles, EditorBeatmap.ControlPointInfo);
+                    if (multitap == null || circles.Any(h => !EditorBeatmap.HitObjects.Contains(h))) return;
+                    EditorBeatmap.BeginChange();
+                    foreach (var circle in circles) EditorBeatmap.Remove(circle);
+                    EditorBeatmap.Add(multitap);
+                    SelectedItems.Clear();
+                    SelectedItems.Add(multitap);
+                    EditorBeatmap.EndChange();
+                });
 
             if (canMerge(selectedMergeableObjects))
                 yield return new OsuMenuItem("Merge selection", MenuItemType.Destructive, mergeSelection);

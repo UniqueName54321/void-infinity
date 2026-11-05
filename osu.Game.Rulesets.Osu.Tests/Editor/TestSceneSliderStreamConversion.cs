@@ -6,6 +6,9 @@
 using System.Linq;
 using NUnit.Framework;
 using osu.Framework.Utils;
+using osu.Framework.Testing;
+using osu.Game.Overlays.Dialog;
+using osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Screens.Edit;
@@ -18,6 +21,36 @@ namespace osu.Game.Rulesets.Osu.Tests.Editor
     public partial class TestSceneSliderStreamConversion : TestSceneOsuEditor
     {
         private BindableBeatDivisor beatDivisor => (BindableBeatDivisor)Editor.Dependencies.Get(typeof(BindableBeatDivisor));
+
+        [Test]
+        public void TestMovingSliderConversionRequiresConfirmationAndSupportsUndo()
+        {
+            Slider slider = null;
+            AddStep("select moving slider", () =>
+            {
+                slider = EditorBeatmap.HitObjects.OfType<Slider>().First();
+                EditorBeatmap.BeginChange();
+                slider.Path.ControlPoints.Last().Movement = new Vector2(0, 50);
+                EditorBeatmap.Update(slider);
+                EditorBeatmap.EndChange();
+                EditorClock.Seek(slider.StartTime);
+                EditorBeatmap.SelectedHitObjects.Add(slider);
+            });
+            AddStep("request conversion", () => Editor.ChildrenOfType<SliderSelectionBlueprint>().Single(b => b.HitObject == slider)
+                .ContextMenuItems.Single(i => i.Text.Value == "Convert to stream").Action.Value.Invoke());
+            AddUntilStep("confirmation shown", () => DialogOverlay.ChildrenOfType<PopupDialogDangerousButton>().Any(b => b.Text == "Convert to stream"));
+            AddAssert("slider retained before confirmation", () => EditorBeatmap.HitObjects.Contains(slider));
+            AddStep("cancel", () => DialogOverlay.ChildrenOfType<PopupDialogCancelButton>().Single(b => b.Text == "Cancel").TriggerClick());
+            AddAssert("movement retained after cancel", () => slider.HasMovement && EditorBeatmap.HitObjects.Contains(slider));
+            AddStep("request again", () => Editor.ChildrenOfType<SliderSelectionBlueprint>().Single(b => b.HitObject == slider)
+                .ContextMenuItems.Single(i => i.Text.Value == "Convert to stream").Action.Value.Invoke());
+            AddUntilStep("confirmation shown again", () => DialogOverlay.ChildrenOfType<PopupDialogDangerousButton>().Any(b => b.Text == "Convert to stream" && b.IsPresent));
+            AddStep("confirm", () => DialogOverlay.ChildrenOfType<PopupDialogDangerousButton>().Last(b => b.Text == "Convert to stream" && b.IsPresent).TriggerClick());
+            AddAssert("slider removed", () => !EditorBeatmap.HitObjects.Contains(slider));
+            AddStep("undo conversion", () => Editor.Undo());
+            AddAssert("moving slider restored", () => EditorBeatmap.HitObjects.OfType<Slider>().Any(s => s.StartTime == slider.StartTime
+                && s.Path.ControlPoints.Last().Movement == new Vector2(0, 50)));
+        }
 
         [Test]
         public void TestSimpleConversion()

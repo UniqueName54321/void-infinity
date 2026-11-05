@@ -16,25 +16,35 @@ namespace osu.Game.Rulesets.Taiko.Replays
     {
         public new TaikoBeatmap Beatmap => (TaikoBeatmap)base.Beatmap;
 
-        private const double swell_hit_speed = 50;
+        public bool HumanPlay { get; set; }
+        public bool RandomizeHands { get; set; }
+        public int Seed { get; set; } = 1;
+        public bool AlternateHands { get; set; } = true;
+        public bool StartRight { get; set; }
+        public double SwellInterval { get; set; } = 50;
+        public int ExtraRollHits { get; set; }
 
         public TaikoAutoGenerator(IBeatmap beatmap)
             : base(beatmap)
         {
         }
 
+        private System.Collections.Generic.List<TaikoHitObject> objects = null!;
+
         protected override void GenerateFrames()
         {
-            if (Beatmap.HitObjects.Count == 0)
+            objects = MultitapUtils.PlayableObjects(Beatmap.HitObjects).Cast<TaikoHitObject>().ToList();
+            if (objects.Count == 0)
                 return;
 
-            bool hitButton = true;
+            bool hitButton = !StartRight;
+            var random = new Random(Seed);
 
-            Frames.Add(new TaikoReplayFrame(Beatmap.HitObjects[0].StartTime - 1000));
+            Frames.Add(new TaikoReplayFrame(objects[0].StartTime - 1000));
 
-            for (int i = 0; i < Beatmap.HitObjects.Count; i++)
+            for (int i = 0; i < objects.Count; i++)
             {
-                TaikoHitObject h = Beatmap.HitObjects[i];
+                TaikoHitObject h = objects[i];
                 double endTime = h.GetEndTime();
 
                 switch (h)
@@ -44,9 +54,9 @@ namespace osu.Game.Rulesets.Taiko.Replays
                         int d = 0;
                         int count = 0;
                         int req = swell.RequiredHits;
-                        double hitRate = Math.Min(swell_hit_speed, swell.Duration / req);
+                        double hitRate = Math.Min(HumanPlay ? SwellInterval * (0.9 + random.NextDouble() * 0.2) : SwellInterval, swell.Duration / req);
 
-                        for (double j = h.StartTime; j < endTime; j += hitRate)
+                        for (double j = h.StartTime; j < endTime; j += hitRate * (HumanPlay ? 0.88 + random.NextDouble() * 0.24 : 1))
                         {
                             TaikoAction action;
 
@@ -81,10 +91,20 @@ namespace osu.Game.Rulesets.Taiko.Replays
 
                     case DrumRoll drumRoll:
                     {
-                        foreach (var tick in drumRoll.NestedHitObjects.OfType<DrumRollTick>())
+                        var ticks = drumRoll.NestedHitObjects.OfType<DrumRollTick>().ToArray();
+                        for (int tickIndex = 0; tickIndex < ticks.Length; tickIndex++)
                         {
-                            Frames.Add(new TaikoReplayFrame(tick.StartTime, hitButton ? TaikoAction.LeftCentre : TaikoAction.RightCentre));
-                            hitButton = !hitButton;
+                            var tick = ticks[tickIndex];
+                            double nextTime = tickIndex + 1 < ticks.Length ? ticks[tickIndex + 1].StartTime : endTime;
+                            int hits = nextTime > tick.StartTime ? ExtraRollHits + 1 : 1;
+                            for (int extra = 0; extra < hits; extra++)
+                            {
+                                double time = tick.StartTime + Math.Max(0, nextTime - tick.StartTime) * extra / hits;
+                                if (ExtraRollHits > 0 || !AlternateHands)
+                                    Frames.Add(new TaikoReplayFrame(time - 0.001));
+                                Frames.Add(new TaikoReplayFrame(time, hitButton ? TaikoAction.LeftCentre : TaikoAction.RightCentre));
+                                if (AlternateHands) hitButton = !hitButton;
+                            }
                         }
 
                         break;
@@ -92,6 +112,7 @@ namespace osu.Game.Rulesets.Taiko.Replays
 
                     case Hit hit:
                     {
+                        if (RandomizeHands || (HumanPlay && random.NextDouble() < 0.08)) hitButton = random.Next(2) == 0;
                         TaikoAction[] actions;
 
                         if (hit.Type == HitType.Centre)
@@ -121,7 +142,7 @@ namespace osu.Game.Rulesets.Taiko.Replays
                 double calculatedDelay = canDelayKeyUp ? KEY_UP_DELAY : (nextHitObject.AsNonNull().StartTime - endTime) * 0.9;
                 Frames.Add(new TaikoReplayFrame(endTime + calculatedDelay));
 
-                hitButton = !hitButton;
+                if (AlternateHands) hitButton = !hitButton;
             }
         }
     }

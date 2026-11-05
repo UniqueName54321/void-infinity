@@ -23,7 +23,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty
     {
         private const double star_rating_multiplier = 0.0265;
 
-        public override int Version => 20251020;
+        public override int Version => 20261105;
 
         public OsuDifficultyCalculator(IRulesetInfo ruleset, IWorkingBeatmap beatmap)
             : base(ruleset, beatmap)
@@ -74,11 +74,11 @@ namespace osu.Game.Rulesets.Osu.Difficulty
             double approachRate = CalculateRateAdjustedApproachRate(beatmap.Difficulty.ApproachRate, clockRate);
             double overallDifficulty = CalculateRateAdjustedOverallDifficulty(beatmap.Difficulty.OverallDifficulty, clockRate);
 
-            int hitCircleCount = beatmap.HitObjects.Count(h => h is HitCircle);
+            int hitCircleCount = beatmap.HitObjects.Sum(h => h is MultitapCircle m ? m.Multitap.Count : h is HitCircle ? 1 : 0);
             int sliderCount = beatmap.HitObjects.Count(h => h is Slider);
             int spinnerCount = beatmap.HitObjects.Count(h => h is Spinner);
 
-            int totalHits = beatmap.HitObjects.Count(h => h is not BeatmapEvent);
+            int totalHits = beatmap.HitObjects.Sum(h => h is MultitapCircle m ? m.Multitap.Count : h is BeatmapEvent ? 0 : 1);
 
             double drainRate = beatmap.Difficulty.DrainRate;
 
@@ -169,7 +169,14 @@ namespace osu.Game.Rulesets.Osu.Difficulty
 
             // The first jump is formed by the first two hitobjects of the map.
             // If the map has less than two OsuHitObjects, the enumerator will not return anything.
-            var playableObjects = beatmap.HitObjects.Where(h => h is not BeatmapEvent).ToArray();
+            var playableObjects = beatmap.HitObjects.Where(h => h is not BeatmapEvent)
+                .SelectMany(h => h is MultitapCircle ? h.NestedHitObjects.ToArray() : new[] { h }).OrderBy(h => h.StartTime).ToArray();
+            if (playableObjects.FirstOrDefault() is Slider first && (first.HasMovement || first.Path.ControlPoints.Any(p => p.Velocity != 1)))
+            {
+                var anchor = new HitCircle { StartTime = first.StartTime, Position = first.Position };
+                anchor.ApplyDefaults(beatmap.ControlPointInfo, beatmap.Difficulty);
+                objects.Add(new OsuDifficultyHitObject(first, anchor, clockRate, objects, 0));
+            }
             for (int i = 1; i < playableObjects.Length; i++)
             {
                 objects.Add(new OsuDifficultyHitObject(playableObjects[i], playableObjects[i - 1], clockRate, objects, objects.Count));

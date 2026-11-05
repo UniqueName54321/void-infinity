@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Allocation;
@@ -85,6 +85,7 @@ namespace osu.Game.Rulesets.Catch.UI
 
             RegisterPool<Droplet, DrawableDroplet>(50);
             RegisterPool<TinyDroplet, DrawableTinyDroplet>(50);
+            RegisterPool<MultitapFruit, DrawableMultitapFruit>(4, 50);
             RegisterPool<Fruit, DrawableFruit>(100);
             RegisterPool<Banana, DrawableBanana>(100);
             RegisterPool<JuiceStream, DrawableJuiceStream>(10);

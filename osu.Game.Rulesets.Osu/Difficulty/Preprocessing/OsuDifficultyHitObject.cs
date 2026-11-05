@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -251,6 +251,39 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Preprocessing
             }
         }
 
+        private void computeExtendedSliderTracking(Slider slider)
+        {
+            LazyTravelTime = Math.Max(0, slider.Duration);
+            Vector2 cursor = slider.StackedPosition;
+            Vector2 previousBall = slider.StackedPosition + slider.CurvePositionAt(0);
+            double rawDistance = 0;
+            double speedEnergy = 0;
+            double scaling = NORMALISED_RADIUS / slider.Radius;
+            int samples = (int)Math.Clamp(Math.Ceiling(LazyTravelTime / 8), 64, 4096);
+            double stepTime = LazyTravelTime / samples;
+            for (int i = 1; i <= samples; i++)
+            {
+                Vector2 ball = slider.StackedPosition + slider.CurvePositionAt((double)i / samples);
+                double segment = Vector2.Distance(previousBall, ball) * scaling;
+                rawDistance += segment;
+                if (stepTime > 0) speedEnergy += segment * segment / stepTime;
+                Vector2 movement = ball - cursor;
+                double distance = movement.Length * scaling;
+                double threshold = i == samples ? NORMALISED_RADIUS : assumed_slider_radius;
+                if (distance > threshold)
+                {
+                    double required = distance - threshold;
+                    cursor += movement * (float)(required / distance);
+                    LazyTravelDistance += required;
+                }
+                previousBall = ball;
+            }
+            // At equal duration and distance, a bursty reach demands more tracking speed than uniform motion.
+            if (rawDistance > 0)
+                LazyTravelDistance *= Math.Max(1, Math.Sqrt(speedEnergy * LazyTravelTime) / rawDistance);
+            LazyEndPosition = cursor;
+        }
+
         private void computeSliderCursorPosition()
         {
             if (BaseObject is not Slider slider)
@@ -258,6 +291,12 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Preprocessing
 
             if (LazyEndPosition != null)
                 return;
+
+            if (slider.HasMovement || slider.Path.ControlPoints.Any(p => p.Velocity != 1))
+            {
+                computeExtendedSliderTracking(slider);
+                return;
+            }
 
             // TODO: This commented version is actually correct by the new lazer implementation, but intentionally held back from
             // difficulty calculator to preserve known behaviour.

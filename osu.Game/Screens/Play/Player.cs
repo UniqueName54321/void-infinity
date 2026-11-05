@@ -361,6 +361,9 @@ namespace osu.Game.Screens.Play
             // we may want to limit this in the future to disallow rulesets from outright replacing elements the user expects to be there.
             failAnimationContainer.Add(createOverlayComponents());
 
+            if (GameplayState.Mods.OfType<ModAutoplay>().Any(m => m.HumanPlay.Value))
+                AddInternal(new HumanPlayIndicator());
+
             if (!DrawableRuleset.AllowGameplayOverlays)
             {
                 HUDOverlay.ShowHud.Value = false;

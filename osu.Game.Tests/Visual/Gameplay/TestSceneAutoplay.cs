@@ -31,6 +31,7 @@ namespace osu.Game.Tests.Visual.Gameplay
 
         protected override void AddCheckSteps()
         {
+            AddAssert("default autoplay has no human marker", () => !Player.ChildrenOfType<HumanPlayIndicator>().Any());
             // we only want this beatmap for time reference.
             var referenceBeatmap = CreateBeatmap(new OsuRuleset().RulesetInfo);
 

@@ -39,6 +39,18 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders.Components
         public readonly BindableBool IsSelected = new BindableBool();
         public readonly PathControlPoint ControlPoint;
 
+        private bool showMovement;
+
+        public bool ShowMovement
+        {
+            get => showMovement;
+            set
+            {
+                showMovement = value;
+                updateMarkerDisplay();
+            }
+        }
+
         private readonly T hitObject;
         private readonly FastCircle circle;
         private readonly Drawable markerRing;
@@ -184,7 +196,7 @@ namespace osu.Game.Rulesets.Osu.Edit.Blueprints.Sliders.Components
         /// </summary>
         private void updateMarkerDisplay()
         {
-            Position = hitObject.StackedPosition + ControlPoint.Position + ControlPoint.Movement;
+            Position = hitObject.StackedPosition + ControlPoint.Position + (ShowMovement ? ControlPoint.Movement : Vector2.Zero);
 
             markerRing.Alpha = IsSelected.Value ? 1 : 0;
 

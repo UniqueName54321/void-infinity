@@ -18,6 +18,11 @@ namespace osu.Game.Database
         public bool Batch { get; set; }
 
         /// <summary>
+        /// Process imported beatmaps locally without querying online metadata.
+        /// </summary>
+        public bool SkipOnlineMetadataLookup { get; set; }
+
+        /// <summary>
         /// Whether this import should use hard links rather than file copy operations if available.
         /// </summary>
         public bool PreferHardLinks { get; set; }

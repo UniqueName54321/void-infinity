@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Generic;
@@ -22,6 +22,25 @@ namespace osu.Game.Rulesets.Osu.Tests.Mods
     public partial class TestSceneOsuModRelax : OsuModTestScene
     {
         protected override TestPlayer CreateModPlayer(Ruleset ruleset) => new ModRelaxTestPlayer(CurrentTestData, AllowFail);
+
+        [SetUp]
+        public void UseLocalAvatar() => Schedule(() => API.LocalUser.Value.AvatarUrl = "Online/avatar-guest");
+
+        [Test]
+        public void TestMultitapRelax() => CreateModTest(new ModTestData
+        {
+            Mod = new OsuModRelax(), Autoplay = false,
+            CreateBeatmap = () => new Beatmap
+            {
+                HitObjects = { new MultitapCircle { StartTime = 1000, Position = new Vector2(100), Multitap = new MultitapSettings { Count = 8 } } },
+            },
+            ReplayFrames = new List<ReplayFrame>
+            {
+                new OsuReplayFrame(0, new Vector2(100)),
+                new OsuReplayFrame(4000, new Vector2(100)),
+            },
+            PassCondition = () => Player.ScoreProcessor.Combo.Value == 8,
+        });
 
         [Test]
         public void TestRelax() => CreateModTest(new ModTestData

@@ -1,15 +1,42 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Graphics;
-using osu.Game.Rulesets.Edit;
+using osu.Framework.Allocation;
+using osu.Framework.Extensions;
+using osu.Framework.Graphics.Cursor;
+using osu.Framework.Graphics.UserInterface;
+using osu.Game.Graphics.UserInterface;
 using osu.Game.Rulesets.Objects;
+using osu.Game.Screens.Edit;
+using osu.Game.Screens.Edit.Components;
+using osu.Game.Rulesets.Edit;
 using osuTK;
+using osu.Game.Rulesets.Taiko.Objects;
 
 namespace osu.Game.Rulesets.Taiko.Edit.Blueprints
 {
-    public partial class TaikoSelectionBlueprint : HitObjectSelectionBlueprint
+    public partial class TaikoSelectionBlueprint : HitObjectSelectionBlueprint, IHasPopover
     {
+        [Resolved]
+        private EditorBeatmap? editorBeatmap { get; set; }
+
+        public override MenuItem[] ContextMenuItems => Item is Hit ? new MenuItem[]
+        {
+            new OsuMenuItem("Configure multitap", MenuItemType.Standard, () => this.ShowPopover()),
+        } : base.ContextMenuItems;
+
+        public Popover GetPopover() => new MultitapPopover(Item.Multitap ?? new MultitapSettings
+        {
+            BeatsPerBar = editorBeatmap?.ControlPointInfo.TimingPointAt(Item.StartTime).TimeSignature.Numerator ?? 4,
+        }, settings =>
+        {
+            if (editorBeatmap == null) return;
+            MultitapEditor.Apply(editorBeatmap, Item, settings, multi => multi
+                ? new MultitapHit { IsStrong = ((Hit)Item).IsStrong }
+                : new Hit { IsStrong = ((Hit)Item).IsStrong });
+        });
+
         public TaikoSelectionBlueprint(HitObject hitObject)
             : base(hitObject)
         {

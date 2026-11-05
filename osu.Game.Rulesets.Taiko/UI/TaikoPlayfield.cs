@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -180,6 +180,7 @@ namespace osu.Game.Rulesets.Taiko.UI
                 inputDrum,
             };
 
+            RegisterPool<MultitapHit, DrawableMultitapHit>(4, 50);
             RegisterPool<Hit, DrawableHit>(50);
             RegisterPool<Hit.StrongNestedHit, DrawableHit.StrongNestedHit>(50);
 

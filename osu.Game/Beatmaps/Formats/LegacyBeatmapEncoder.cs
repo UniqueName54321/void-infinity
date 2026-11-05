@@ -417,7 +417,7 @@ namespace osu.Game.Beatmaps.Formats
             }
             else
             {
-                if (hitObject is IHasDuration)
+                if (hitObject is IHasDuration && hitObject.Multitap == null)
                     addEndTimeData(writer, hitObject);
 
                 writer.Write(getSampleBank(hitObject.Samples));
@@ -444,7 +444,7 @@ namespace osu.Game.Beatmaps.Formats
                     type |= LegacyHitObjectType.Slider;
                     break;
 
-                case IHasDuration:
+                case IHasDuration when hitObject.Multitap == null:
                     if (onlineRulesetID == 3)
                         type |= LegacyHitObjectType.Hold;
                     else

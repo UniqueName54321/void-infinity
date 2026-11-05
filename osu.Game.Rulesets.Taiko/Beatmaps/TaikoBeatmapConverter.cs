@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Game.Beatmaps;
@@ -47,6 +47,12 @@ namespace osu.Game.Rulesets.Taiko.Beatmaps
         {
             isForCurrentRuleset = beatmap.BeatmapInfo.Ruleset.Equals(ruleset.RulesetInfo);
         }
+
+        protected override TaikoHitObject ConvertMultitap(HitObject original, IBeatmap beatmap) => new MultitapHit
+        {
+            StartTime = original.StartTime, Samples = original.Samples, Multitap = original.Multitap,
+            IsStrong = original is TaikoStrongableHitObject t ? t.IsStrong : original.Samples.Any(s => s.Name == HitSampleInfo.HIT_FINISH),
+        };
 
         public override bool CanConvert() => true;
 

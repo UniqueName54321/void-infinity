@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Game.Beatmaps;
@@ -19,6 +19,14 @@ namespace osu.Game.Rulesets.Catch.Beatmaps
             : base(beatmap, ruleset)
         {
         }
+
+        protected override CatchHitObject ConvertMultitap(HitObject original, IBeatmap beatmap) => new MultitapFruit
+        {
+            StartTime = original.StartTime, Samples = original.Samples, Multitap = original.Multitap,
+            X = ((IHasXPosition)original).X,
+            NewCombo = (original as IHasCombo)?.NewCombo ?? false, ComboOffset = (original as IHasCombo)?.ComboOffset ?? 0,
+            LegacyConvertedY = (original as IHasYPosition)?.Y ?? CatchHitObject.DEFAULT_LEGACY_CONVERT_Y,
+        };
 
         public override bool CanConvert() => Beatmap.HitObjects.All(h => h is IHasXPosition);
 

@@ -116,6 +116,7 @@ namespace osu.Game.Rulesets.Mania.UI
             BackgroundContainer.Add(background);
             TopLevelContainer.Add(HitObjectArea.Explosions.CreateProxy());
 
+            RegisterPool<MultitapNote, DrawableMultitapNote>(4, 50);
             RegisterPool<Note, DrawableNote>(10, 50);
             RegisterPool<HoldNote, DrawableHoldNote>(10, 50);
             RegisterPool<HeadNote, DrawableHoldNoteHead>(10, 50);

@@ -31,6 +31,9 @@ namespace osu.Game.Rulesets.Objects
     /// </summary>
     public class HitObject
     {
+        /// <summary>Native multitap extension; only supported by standard circles.</summary>
+        public MultitapSettings Multitap { get; set; }
+
         /// <summary>
         /// A small adjustment to the start time of control points to account for rounding/precision errors.
         /// </summary>

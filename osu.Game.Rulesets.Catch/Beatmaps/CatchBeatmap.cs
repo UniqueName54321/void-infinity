@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -15,7 +15,7 @@ namespace osu.Game.Rulesets.Catch.Beatmaps
     {
         public override IEnumerable<BeatmapStatistic> GetStatistics()
         {
-            int fruits = HitObjects.Count(s => s is Fruit);
+            int fruits = HitObjects.Sum(s => s is MultitapFruit m ? m.Multitap.Count : s is Fruit ? 1 : 0);
             int juiceStreams = HitObjects.Count(s => s is JuiceStream);
             int bananaShowers = HitObjects.Count(s => s is BananaShower);
             int sum = Math.Max(1, fruits + juiceStreams);
@@ -58,7 +58,7 @@ namespace osu.Game.Rulesets.Catch.Beatmaps
 
             IEnumerable<PalpableCatchHitObject> selectPalpableObjects(HitObject h)
             {
-                if (h is PalpableCatchHitObject palpable)
+                if (h is PalpableCatchHitObject palpable && h is not IHasMultitap)
                     yield return palpable;
 
                 foreach (var nested in h.NestedHitObjects.OfType<PalpableCatchHitObject>())

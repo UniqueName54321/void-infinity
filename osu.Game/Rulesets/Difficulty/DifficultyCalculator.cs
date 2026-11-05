@@ -184,7 +184,8 @@ namespace osu.Game.Rulesets.Difficulty
         private void preProcess([NotNull] IEnumerable<Mod> mods, CancellationToken cancellationToken)
         {
             playableMods = mods.Select(m => m.DeepClone()).ToArray();
-            Beatmap = WorkingBeatmap.GetPlayableBeatmap(ruleset, playableMods, cancellationToken);
+            Beatmap = WorkingBeatmap.GetPlayableBeatmap(ruleset, playableMods, cancellationToken).Clone();
+            osu.Game.Rulesets.Objects.MultitapUtils.ReplaceWithStreams(Beatmap, useNestedObjects: true);
 
             clockRate = ModUtils.CalculateRateWithMods(playableMods);
         }

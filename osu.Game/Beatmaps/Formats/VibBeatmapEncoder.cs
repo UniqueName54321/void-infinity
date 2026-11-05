@@ -33,6 +33,8 @@ namespace osu.Game.Beatmaps.Formats
                 Legacy = legacy.ToString(),
                 ClampSliderMovement = beatmap.ClampSliderMovement,
                 Paths = beatmap.HitObjects.OfType<IHasPath>().Select(p => p.Path.ControlPoints.Select(c => c.Clone()).ToArray()).ToArray(),
+                Multitaps = beatmap.HitObjects.Where(h => h is not IHasBeatmapEvent).Select((h, i) => new VibMultitap { Index = i, Settings = h.Multitap })
+                    .Where(m => m.Settings != null).ToArray(),
                 Events = beatmap.HitObjects.OfType<IHasBeatmapEvent>().Select(e => new VibEvent
                 {
                     Time = ((HitObject)e).StartTime,
@@ -48,8 +50,20 @@ namespace osu.Game.Beatmaps.Formats
         public string Legacy { get; set; } = string.Empty;
         [System.ComponentModel.DefaultValue(true)]
         public bool ClampSliderMovement { get; set; } = true;
+        // Older native maps may omit extension collections. Preserve their empty initializers
+        // instead of allowing the global IgnoreAndPopulate policy to replace them with null.
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore)]
         public PathControlPoint[][] Paths { get; set; } = System.Array.Empty<PathControlPoint[]>();
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore)]
+        public VibMultitap[] Multitaps { get; set; } = System.Array.Empty<VibMultitap>();
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore)]
         public VibEvent[] Events { get; set; } = System.Array.Empty<VibEvent>();
+    }
+
+    internal class VibMultitap
+    {
+        public int Index { get; set; }
+        public MultitapSettings Settings { get; set; } = null!;
     }
 
     internal class VibEvent

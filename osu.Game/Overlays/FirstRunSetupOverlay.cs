@@ -41,6 +41,7 @@ namespace osu.Game.Overlays
             AddStep<ScreenBeatmaps>();
             if (legacyImportManager?.SupportsImportFromStable == true)
                 AddStep<ScreenImportFromStable>();
+            AddStep<ScreenImportFromLazer>();
             AddStep<ScreenBehaviour>();
 
             Header.Title = FirstRunSetupOverlayStrings.FirstRunSetupTitle;

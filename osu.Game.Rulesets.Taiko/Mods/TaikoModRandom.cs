@@ -7,6 +7,7 @@ using osu.Framework.Localisation;
 using osu.Framework.Utils;
 using osu.Game.Beatmaps;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Taiko.Beatmaps;
 using osu.Game.Rulesets.Taiko.Objects;
 
@@ -24,7 +25,7 @@ namespace osu.Game.Rulesets.Taiko.Mods
             Seed.Value ??= RNG.Next();
             var rng = new Random((int)Seed.Value);
 
-            foreach (var obj in taikoBeatmap.HitObjects)
+            foreach (var obj in MultitapUtils.PlayableObjects(taikoBeatmap.HitObjects))
             {
                 if (obj is Hit hit)
                     hit.Type = rng.Next(2) == 0 ? HitType.Centre : HitType.Rim;

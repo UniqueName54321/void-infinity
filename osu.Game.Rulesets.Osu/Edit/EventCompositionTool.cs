@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Primitives;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics.Sprites;
@@ -17,7 +18,7 @@ namespace osu.Game.Rulesets.Osu.Edit
     public class EventCompositionTool : CompositionTool
     {
         public EventCompositionTool() : base("Event") { }
-        public override Drawable CreateIcon() => new OsuSpriteText { Text = "E" };
+        public override Drawable CreateIcon() => new Container { Child = new OsuSpriteText { Text = "E", Anchor = Anchor.Centre, Origin = Anchor.Centre } };
         public override HitObjectPlacementBlueprint CreatePlacementBlueprint() => new EventPlacementBlueprint();
     }
 

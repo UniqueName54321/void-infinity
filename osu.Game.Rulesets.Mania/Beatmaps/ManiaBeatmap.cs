@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -35,7 +35,7 @@ namespace osu.Game.Rulesets.Mania.Beatmaps
 
         public override IEnumerable<BeatmapStatistic> GetStatistics()
         {
-            int notes = HitObjects.Count(s => s is Note);
+            int notes = HitObjects.Sum(s => s is MultitapNote m ? m.Multitap.Count : s is Note ? 1 : 0);
             int holdNotes = HitObjects.Count(s => s is HoldNote);
             int sum = Math.Max(1, notes + holdNotes);
 

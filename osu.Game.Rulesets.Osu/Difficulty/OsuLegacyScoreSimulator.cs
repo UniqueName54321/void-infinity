@@ -39,6 +39,10 @@ namespace osu.Game.Rulesets.Osu.Difficulty
             {
                 switch (obj)
                 {
+                    case HitObject h when h.Multitap != null:
+                        countNormal += h.Multitap.Count;
+                        break;
+
                     case IHasPath:
                         countSlider++;
                         break;
@@ -79,6 +83,12 @@ namespace osu.Game.Rulesets.Osu.Difficulty
 
         private void simulateHit(HitObject hitObject, ref LegacyScoreAttributes attributes)
         {
+            if (hitObject is MultitapCircle)
+            {
+                foreach (var tap in hitObject.NestedHitObjects) simulateHit(tap, ref attributes);
+                return;
+            }
+
             bool increaseCombo = true;
             bool addScoreComboMultiplier = false;
 

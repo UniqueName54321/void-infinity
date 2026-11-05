@@ -18,15 +18,11 @@ namespace osu.Game.Overlays.Settings.Sections.UserInterface
     {
         protected override LocalisableString Header => UserInterfaceStrings.MainMenuHeader;
 
-        private IBindable<APIUser> user;
-
         private SettingsEnumDropdown<BackgroundSource> backgroundSourceDropdown;
 
         [BackgroundDependencyLoader]
-        private void load(OsuConfigManager config, IAPIProvider api)
+        private void load(OsuConfigManager config)
         {
-            user = api.LocalUser.GetBoundCopy();
-
             Children = new Drawable[]
             {
                 new SettingsCheckbox
@@ -64,17 +60,5 @@ namespace osu.Game.Overlays.Settings.Sections.UserInterface
             };
         }
 
-        protected override void LoadComplete()
-        {
-            base.LoadComplete();
-
-            user.BindValueChanged(u =>
-            {
-                if (u.NewValue?.IsSupporter != true)
-                    backgroundSourceDropdown.SetNoticeText(UserInterfaceStrings.NotSupporterNote, true);
-                else
-                    backgroundSourceDropdown.ClearNoticeText();
-            }, true);
-        }
     }
 }

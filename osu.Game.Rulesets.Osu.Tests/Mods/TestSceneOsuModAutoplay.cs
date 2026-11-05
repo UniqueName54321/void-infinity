@@ -24,6 +24,9 @@ namespace osu.Game.Rulesets.Osu.Tests.Mods
     {
         protected override bool AllowFail => true;
 
+        [SetUp]
+        public void UseLocalAvatar() => Schedule(() => API.LocalUser.Value.AvatarUrl = "Online/avatar-guest");
+
         [Test]
         public void TestCursorPositionStoredToJudgement()
         {
@@ -80,6 +83,63 @@ namespace osu.Game.Rulesets.Osu.Tests.Mods
                 },
                 PassCondition = () => Player.ScoreProcessor.TotalScore.Value == 1_000_000
             });
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void TestMultitapAutoplay(bool human)
+        {
+            var autoplay = new OsuModAutoplay();
+            autoplay.HumanPlay.Value = human;
+            CreateModTest(new ModTestData
+            {
+                Autoplay = false,
+                Mod = autoplay,
+                CreateBeatmap = () => new Beatmap
+                {
+                    HitObjects = { new MultitapCircle { StartTime = 1000, Position = new Vector2(256, 192), Multitap = new MultitapSettings { Count = 8 } } },
+                },
+                PassCondition = () => Player.ScoreProcessor.JudgedHits >= 8,
+            });
+            AddUntilStep("all eight taps judged", () => Player.ScoreProcessor.HitEvents.Count(e => e.HitObject is MultitapHitCircle) == 8);
+            AddStep("all eight taps hit", () => Assert.That(Player.ScoreProcessor.HitEvents.Where(e => e.HitObject is MultitapHitCircle).Select(e => e.Result), Is.All.EqualTo(HitResult.Great)));
+        }
+
+        [Test]
+        public void TestMultitapMissesIndividually()
+        {
+            CreateModTest(new ModTestData
+            {
+                Autoplay = false,
+                CreateBeatmap = () => new Beatmap
+                {
+                    HitObjects = { new MultitapCircle { StartTime = 1000, Position = new Vector2(256, 192), Multitap = new MultitapSettings { Count = 4 } } },
+                },
+                PassCondition = () => Player.ScoreProcessor.HitEvents.Count(e => e.Result == HitResult.Miss && e.HitObject is MultitapHitCircle) == 4,
+            });
+        }
+
+        [Test]
+        public void TestOnePressDoesNotCompleteMultitap()
+        {
+            CreateModTest(new ModTestData
+            {
+                Autoplay = false,
+                ReplayFrames = new List<osu.Game.Rulesets.Replays.ReplayFrame>
+                {
+                    new osu.Game.Rulesets.Osu.Replays.OsuReplayFrame(1000, new Vector2(256, 192), OsuAction.LeftButton),
+                    new osu.Game.Rulesets.Osu.Replays.OsuReplayFrame(1020, new Vector2(256, 192)),
+                    new osu.Game.Rulesets.Osu.Replays.OsuReplayFrame(3000, new Vector2(256, 192)),
+                },
+                CreateBeatmap = () => new Beatmap
+                {
+                    HitObjects = { new MultitapCircle { StartTime = 1000, Position = new Vector2(256, 192), Multitap = new MultitapSettings { Count = 4 } } },
+                },
+                PassCondition = () => Player.ScoreProcessor.JudgedHits >= 4,
+            });
+            AddUntilStep("four taps judged", () => Player.ScoreProcessor.HitEvents.Count(e => e.HitObject is MultitapHitCircle) == 4);
+            AddAssert("one hit and three misses", () => Player.ScoreProcessor.HitEvents.Count(e => e.HitObject is MultitapHitCircle && e.Result.IsHit()) == 1
+                                                        && Player.ScoreProcessor.HitEvents.Count(e => e.HitObject is MultitapHitCircle && e.Result == HitResult.Miss) == 3);
         }
 
         private void runSpmTest(Mod mod)

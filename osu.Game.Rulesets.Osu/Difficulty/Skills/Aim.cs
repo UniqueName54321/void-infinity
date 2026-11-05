@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -8,6 +8,7 @@ using osu.Game.Rulesets.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.Difficulty.Evaluators;
 using osu.Game.Rulesets.Osu.Difficulty.Utils;
+using osu.Game.Rulesets.Osu.Difficulty.Preprocessing;
 using osu.Game.Rulesets.Osu.Objects;
 
 namespace osu.Game.Rulesets.Osu.Difficulty.Skills
@@ -39,7 +40,16 @@ namespace osu.Game.Rulesets.Osu.Difficulty.Skills
         protected override double StrainValueAt(DifficultyHitObject current)
         {
             currentStrain *= strainDecay(current.DeltaTime);
-            currentStrain += AimEvaluator.EvaluateDifficultyOf(current, IncludeSliders) * skillMultiplier;
+            double aim = AimEvaluator.EvaluateDifficultyOf(current, IncludeSliders);
+            if (IncludeSliders && current.BaseObject is Slider nativeSlider
+                && (nativeSlider.HasMovement || nativeSlider.Path.ControlPoints.Any(p => p.Velocity != 1)))
+            {
+                // Tracking is a demand of this object itself, even when it is among the first
+                // objects or the last slider has no following jump to carry its travel strain.
+                var tracking = (OsuDifficultyHitObject)current;
+                aim = Math.Max(aim, tracking.TravelDistance / tracking.TravelTime * 1.35);
+            }
+            currentStrain += aim * skillMultiplier;
 
             if (current.BaseObject is Slider)
                 sliderStrains.Add(currentStrain);

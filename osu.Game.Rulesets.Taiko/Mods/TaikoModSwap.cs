@@ -8,6 +8,7 @@ using osu.Framework.Localisation;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Taiko.Beatmaps;
 using osu.Game.Rulesets.Taiko.Objects;
 
@@ -28,7 +29,7 @@ namespace osu.Game.Rulesets.Taiko.Mods
         {
             var taikoBeatmap = (TaikoBeatmap)beatmap;
 
-            foreach (var obj in taikoBeatmap.HitObjects)
+            foreach (var obj in MultitapUtils.PlayableObjects(taikoBeatmap.HitObjects))
             {
                 if (obj is Hit hit)
                     hit.Type = hit.Type == HitType.Centre ? HitType.Rim : HitType.Centre;

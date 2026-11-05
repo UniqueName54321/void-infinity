@@ -154,7 +154,13 @@ namespace osu.Game.Beatmaps
 
         IBeatmap IBeatmap.Clone() => Clone();
 
-        public Beatmap<T> Clone() => (Beatmap<T>)MemberwiseClone();
+        public Beatmap<T> Clone()
+        {
+            var clone = (Beatmap<T>)MemberwiseClone();
+            // Object instances remain shared; list edits must not alter a cached playable map.
+            clone.HitObjects = new List<T>(HitObjects);
+            return clone;
+        }
 
         public override string ToString() => BeatmapInfo.ToString();
     }

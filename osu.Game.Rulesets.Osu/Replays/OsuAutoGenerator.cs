@@ -11,10 +11,12 @@ using System.Diagnostics;
 using System.Linq;
 using osu.Framework.Graphics;
 using osu.Game.Replays;
+using osu.Game.Rulesets.Replays;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu.Beatmaps;
 using osu.Game.Rulesets.Osu.Scoring;
+using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Scoring;
 
 namespace osu.Game.Rulesets.Osu.Replays
@@ -31,6 +33,15 @@ namespace osu.Game.Rulesets.Osu.Replays
         /// If delayed movements should be used, causing the cursor to stay on each hitobject for as long as possible.
         /// Mainly for Autopilot.
         /// </summary>
+        public bool HumanPlay { get; set; }
+        public AutoplayCursorStyle CursorStyle { get; set; }
+        public AutoplayTapStyle TappingStyle { get; set; }
+        public AutoplaySpinDirection SpinnerDirection { get; set; }
+        public double DanceStrength { get; set; } = 60;
+        public double SpinnerRPM { get; set; } = 477.464829;
+        public double ReactionTime { get; set; } = 100;
+        public int Seed { get; set; } = 1;
+        private int objectIndex;
         public bool DelayedMovements; // ModManager.CheckActive(Mods.Relax2);
 
         #endregion
@@ -42,7 +53,7 @@ namespace osu.Game.Rulesets.Osu.Replays
         /// <summary>
         /// What easing to use when moving between hitobjects
         /// </summary>
-        private Easing preferredEasing => DelayedMovements ? Easing.InOutCubic : Easing.Out;
+        private Easing preferredEasing => HumanPlay ? Easing.InOutSine : CursorStyle == AutoplayCursorStyle.Linear ? Easing.None : DelayedMovements ? Easing.InOutCubic : Easing.Out;
 
         #endregion
 
@@ -68,20 +79,24 @@ namespace osu.Game.Rulesets.Osu.Replays
 
         public override Replay Generate()
         {
-            if (Beatmap.HitObjects.Count == 0)
+            Frames.Clear();
+            var objects = Beatmap.HitObjects.Where(h => h is not BeatmapEvent)
+                .SelectMany(h => h is MultitapCircle ? h.NestedHitObjects.Cast<OsuHitObject>() : new[] { h }).OrderBy(h => h.StartTime).ToArray();
+            if (objects.Length == 0)
                 return Replay;
 
             buttonIndex = 0;
 
-            AddFrameToReplay(new OsuReplayFrame(Beatmap.HitObjects[0].StartTime - 1500, new Vector2(256, 500)));
+            AddFrameToReplay(new OsuReplayFrame(objects[0].StartTime - 1500, new Vector2(256, 500)));
 
-            for (int i = 0; i < Beatmap.HitObjects.Count; i++)
+            for (int i = 0; i < objects.Length; i++)
             {
-                OsuHitObject h = Beatmap.HitObjects[i];
+                OsuHitObject h = objects[i];
+                objectIndex = i;
 
                 if (DelayedMovements && i > 0)
                 {
-                    OsuHitObject prev = Beatmap.HitObjects[i - 1];
+                    OsuHitObject prev = objects[i - 1];
                     addDelayedMovements(h, prev);
                 }
 
@@ -145,6 +160,8 @@ namespace osu.Game.Rulesets.Osu.Replays
         {
             // Default values for circles/sliders
             Vector2 startPosition = h.StackedPosition;
+            if (HumanPlay && h is HitCircle)
+                startPosition += new Vector2((float)HumanPlayNoise.At(objectIndex, Seed, 10), (float)HumanPlayNoise.At(objectIndex, Seed, 11)) * (float)(h.Radius * 0.3);
             Easing easing = preferredEasing;
             float spinnerDirection = -1;
 
@@ -158,6 +175,8 @@ namespace osu.Game.Rulesets.Osu.Replays
                     return;
 
                 calcSpinnerStartPosAndDirection(((OsuReplayFrame)Frames[^1]).Position, out startPosition, out spinnerDirection);
+                if (SpinnerDirection != AutoplaySpinDirection.Automatic)
+                    spinnerDirection = SpinnerDirection == AutoplaySpinDirection.Clockwise ? 1 : -1;
 
                 Vector2 spinCentreOffset = SPINNER_CENTRE - ((OsuReplayFrame)Frames[^1]).Position;
 
@@ -239,7 +258,20 @@ namespace osu.Game.Rulesets.Osu.Replays
 
             if (waitTime > lastFrame.Time)
             {
-                lastFrame = new OsuReplayFrame(waitTime, lastFrame.Position) { Actions = lastFrame.Actions };
+                if (HumanPlay && !lastFrame.Actions.Any())
+                {
+                    // A resting hand drifts instead of freezing perfectly during a gap.
+                    Vector2 rest = lastFrame.Position;
+                    int restFrames = (int)Math.Min(120, Math.Floor((waitTime - lastFrame.Time) / 24));
+                    for (int i = 1; i <= restFrames; i++)
+                    {
+                        // Bound work even for beatmaps with extremely long breaks.
+                        double time = lastFrame.Time + (waitTime - lastFrame.Time) * i / (restFrames + 1);
+                        Vector2 drift = new Vector2((float)HumanPlayNoise.Sample(time, 170, Seed, 12), (float)HumanPlayNoise.Sample(time, 190, Seed, 13)) * 2;
+                        AddFrameToReplay(new OsuReplayFrame(time, rest + drift));
+                    }
+                }
+                lastFrame = new OsuReplayFrame(waitTime, ((OsuReplayFrame)Frames[^1]).Position) { Actions = lastFrame.Actions };
                 hasWaited = true;
                 AddFrameToReplay(lastFrame);
             }
@@ -258,17 +290,51 @@ namespace osu.Game.Rulesets.Osu.Replays
                 }
 
                 Vector2 lastPosition = lastFrame.Position;
+                var danceRandom = new Random(unchecked(Seed + objectIndex * 397));
+                float danceScale = (float)(0.75 + danceRandom.NextDouble() * 0.25);
+                int danceDirection = danceRandom.Next(2) == 0 ? -1 : 1;
 
                 // Perform the rest of the eased movement until the target position is reached.
                 for (double time = lastFrame.Time + GetFrameDelay(lastFrame.Time); time < h.StartTime; time += GetFrameDelay(time))
                 {
                     Vector2 currentPosition = Interpolation.ValueAt(time, lastPosition, targetPos, lastFrame.Time, h.StartTime, easing);
+                    if (HumanPlay)
+                    {
+                        double progress = (time - lastFrame.Time) / (h.StartTime - lastFrame.Time);
+                        Vector2 delta = targetPos - lastPosition;
+                        float distance = delta.Length;
+                        if (distance > 0)
+                        {
+                            Vector2 direction = delta / distance;
+                            Vector2 normal = new Vector2(-direction.Y, direction.X);
+                            // Different arcs for each reach, followed by a late correction. Both endpoints remain intact.
+                            double bow = HumanPlayNoise.At(objectIndex, Seed, 14);
+                            double correction = HumanPlayNoise.At(objectIndex, Seed, 15);
+                            float envelope = (float)Math.Sin(progress * Math.PI);
+                            currentPosition += normal * envelope * (float)(Math.Min(65, distance * 0.24)
+                                * (bow * (1 - progress) + correction * progress * progress));
+                            currentPosition += direction * (float)(Math.Min(24, distance * 0.1)
+                                * HumanPlayNoise.At(objectIndex, Seed, 16) * Math.Sin(progress * Math.PI * 2) * progress);
+                            currentPosition += new Vector2((float)HumanPlayNoise.Sample(time, 43, Seed, 17), (float)HumanPlayNoise.Sample(time, 59, Seed, 18))
+                                * envelope * Math.Min(2, distance / 30);
+                        }
+                    }
+                    if (CursorStyle == AutoplayCursorStyle.Dance)
+                    {
+                        double progress = (time - lastFrame.Time) / (h.StartTime - lastFrame.Time);
+                        Vector2 delta = targetPos - lastPosition;
+                        if (delta.LengthSquared > 0)
+                        {
+                            Vector2 normal = Vector2.Normalize(new Vector2(-delta.Y, delta.X));
+                            currentPosition += normal * (float)(Math.Sin(progress * Math.PI) * Math.Min(DanceStrength, delta.Length / 2) * danceDirection * danceScale);
+                        }
+                    }
                     AddFrameToReplay(new OsuReplayFrame((int)time, new Vector2(currentPosition.X, currentPosition.Y)) { Actions = lastFrame.Actions });
                 }
             }
 
             // Start alternating once the time separation is too small (faster than ~225BPM).
-            if (timeDifference >= 0 && timeDifference < MIN_FRAME_SEPARATION_FOR_ALTERNATING)
+            if (TappingStyle == AutoplayTapStyle.Alternate || (TappingStyle == AutoplayTapStyle.Adaptive && timeDifference >= 0 && timeDifference < MIN_FRAME_SEPARATION_FOR_ALTERNATING))
                 buttonIndex++;
             else
                 buttonIndex = 0;
@@ -280,7 +346,7 @@ namespace osu.Game.Rulesets.Osu.Replays
         /// <remarks>
         /// Already superhuman, but still somewhat realistic.
         /// </remarks>
-        private double getReactionTime(double timeInstant) => ApplyModsToRate(timeInstant, 100);
+        private double getReactionTime(double timeInstant) => ApplyModsToRate(timeInstant, HumanPlay ? Math.Max(ReactionTime, 140) + 35 * HumanPlayNoise.Sample(timeInstant, 420, Seed, 19) : ReactionTime);
 
         // Add frames to click the hitobject
         private void addHitObjectClickFrames(OsuHitObject h, Vector2 startPosition, float spinnerDirection)
@@ -292,9 +358,9 @@ namespace osu.Game.Rulesets.Osu.Replays
             var startFrame = new OsuReplayFrame(h.StartTime, new Vector2(startPosition.X, startPosition.Y), action);
 
             // TODO: Why do we delay 1 ms if the object is a spinner? There already is KEY_UP_DELAY from hEndTime.
-            double hEndTime = h.GetEndTime() + KEY_UP_DELAY;
+            double hEndTime = h.GetEndTime() + (HumanPlay && h is HitCircle ? 35 + 15 * HumanPlayNoise.At(objectIndex, Seed, 25) : KEY_UP_DELAY);
             int endDelay = h is Spinner ? 1 : 0;
-            var endFrame = new OsuKeyUpReplayFrame(hEndTime + endDelay, new Vector2(h.StackedEndPosition.X, h.StackedEndPosition.Y));
+            var endFrame = new OsuKeyUpReplayFrame(hEndTime + endDelay, HumanPlay && h is HitCircle ? startPosition : h.StackedEndPosition);
 
             // Decrement because we want the previous frame, not the next one
             int index = FindInsertionIndex(startFrame) - 1;
@@ -343,7 +409,7 @@ namespace osu.Game.Rulesets.Osu.Replays
 
             // 0.05 rad/ms, or ~477 RPM, as per stable.
             // the redundant conversion from RPM to rad/ms is here for ease of testing custom SPM specs.
-            const float spin_rpm = 0.05f / (2 * MathF.PI) * 60000;
+            float spin_rpm = (float)(HumanPlay ? Math.Min(SpinnerRPM, 400 + 35 * HumanPlayNoise.At(objectIndex, Seed, 20)) : SpinnerRPM);
             float radsPerMillisecond = float.DegreesToRadians(spin_rpm * 360) / 60000;
 
             switch (h)
@@ -361,9 +427,10 @@ namespace osu.Game.Rulesets.Osu.Replays
                     for (double nextFrame = h.StartTime + GetFrameDelay(h.StartTime); nextFrame < spinner.EndTime; nextFrame += GetFrameDelay(nextFrame))
                     {
                         t = ApplyModsToTimeDelta(previousFrame, nextFrame) * spinnerDirection;
-                        angle += (float)t * radsPerMillisecond;
+                        angle += (float)t * radsPerMillisecond * (float)(HumanPlay ? 1 + 0.08 * HumanPlayNoise.Sample(nextFrame, 180, Seed, 21) : 1);
 
-                        Vector2 pos = SPINNER_CENTRE + CirclePosition(angle, SPIN_RADIUS);
+                        float spinRadius = SPIN_RADIUS * (float)(HumanPlay ? 1 + 0.08 * HumanPlayNoise.Sample(nextFrame, 240, Seed, 22) : 1);
+                        Vector2 pos = SPINNER_CENTRE + CirclePosition(angle, spinRadius);
                         AddFrameToReplay(new OsuReplayFrame((int)nextFrame, new Vector2(pos.X, pos.Y), action));
 
                         previousFrame = nextFrame;
@@ -383,6 +450,9 @@ namespace osu.Game.Rulesets.Osu.Replays
                     for (double j = GetFrameDelay(slider.StartTime); j < slider.Duration; j += GetFrameDelay(slider.StartTime + j))
                     {
                         Vector2 pos = slider.StackedPositionAt(j / slider.Duration);
+                        if (HumanPlay)
+                            pos += new Vector2((float)HumanPlayNoise.Sample(h.StartTime + j, 120, Seed, 23), (float)HumanPlayNoise.Sample(h.StartTime + j, 150, Seed, 24))
+                                * (float)(slider.Radius * 0.2 * Math.Sin(j / slider.Duration * Math.PI));
                         AddFrameToReplay(new OsuReplayFrame(h.StartTime + j, new Vector2(pos.X, pos.Y), action));
                     }
 

@@ -1,7 +1,8 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Generic;
+using System.Linq;
 using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Game.Rulesets.Mania.Objects.Drawables;
 using osu.Game.Rulesets.Objects;
@@ -33,7 +34,8 @@ namespace osu.Game.Rulesets.Mania.UI
         /// <returns>Whether <paramref name="hitObject"/> can be hit at the given <paramref name="time"/>.</returns>
         public bool IsHittable(DrawableHitObject hitObject, double time)
         {
-            var nextObject = hitObjectContainer.AliveObjects.GetNext(hitObject);
+            var notes = playableObjects().ToArray();
+            var nextObject = notes.SkipWhile(h => h != hitObject).Skip(1).FirstOrDefault();
             return nextObject == null || time < nextObject.HitObject.StartTime;
         }
 
@@ -52,23 +54,10 @@ namespace osu.Game.Rulesets.Mania.UI
             }
         }
 
-        private IEnumerable<DrawableHitObject> enumerateHitObjectsUpTo(double targetTime)
-        {
-            foreach (var obj in hitObjectContainer.AliveObjects)
-            {
-                if (obj.HitObject.GetEndTime() >= targetTime)
-                    yield break;
+        private IEnumerable<DrawableHitObject> playableObjects() => hitObjectContainer.AliveObjects
+            .SelectMany(h => h.HitObject is IHasMultitap ? h.NestedHitObjects.ToArray() : new[] { h }).OrderBy(h => h.HitObject.StartTime);
 
-                yield return obj;
-
-                foreach (var nestedObj in obj.NestedHitObjects)
-                {
-                    if (nestedObj.HitObject.GetEndTime() >= targetTime)
-                        break;
-
-                    yield return nestedObj;
-                }
-            }
-        }
+        private IEnumerable<DrawableHitObject> enumerateHitObjectsUpTo(double targetTime) => playableObjects()
+            .Where(h => h.HitObject.GetEndTime() < targetTime);
     }
 }

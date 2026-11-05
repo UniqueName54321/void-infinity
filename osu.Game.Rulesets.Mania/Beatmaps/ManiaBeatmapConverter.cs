@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Game.Rulesets.Mania.Objects;
@@ -111,6 +111,12 @@ namespace osu.Game.Rulesets.Mania.Beatmaps
 
             return converter.TotalColumns;
         }
+
+        protected override ManiaHitObject ConvertMultitap(HitObject original, IBeatmap beatmap) => new MultitapNote
+        {
+            StartTime = original.StartTime, Samples = original.Samples, Multitap = original.Multitap,
+            Column = original is ManiaHitObject m ? m.Column : (int)Math.Clamp(((IHasXPosition)original).X / 512 * TotalColumns, 0, TotalColumns - 1),
+        };
 
         public override bool CanConvert() => Beatmap.HitObjects.All(h => h is IHasXPosition);
 

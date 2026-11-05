@@ -230,6 +230,15 @@ namespace osu.Game.Tests.Visual.Background
         }
 
         [Test]
+        public void TestSkinBackgroundWithoutSupporter()
+        {
+            setSupporter(false);
+            setSourceMode(BackgroundSource.Skin);
+            setCustomSkin();
+            AddUntilStep("non-supporter skin background loaded", () => getCurrentBackground() is SkinBackground);
+        }
+
+        [Test]
         public void TestBackgroundTypeSwitch()
         {
             setSupporter(true);
@@ -248,7 +257,7 @@ namespace osu.Game.Tests.Visual.Background
         }
 
         [Test]
-        public void TestTogglingSupporterTogglesBeatmapBackground()
+        public void TestBackgroundChoiceDoesNotRequireSupporter()
         {
             setSourceMode(BackgroundSource.Beatmap);
 
@@ -256,7 +265,7 @@ namespace osu.Game.Tests.Visual.Background
             AddUntilStep("is beatmap background", () => getCurrentBackground() is BeatmapBackground);
 
             setSupporter(false);
-            AddUntilStep("is default background", () => !(getCurrentBackground() is BeatmapBackground));
+            AddUntilStep("beatmap background remains available", () => getCurrentBackground() is BeatmapBackground);
 
             setSupporter(true);
             AddUntilStep("is beatmap background", () => getCurrentBackground() is BeatmapBackground);

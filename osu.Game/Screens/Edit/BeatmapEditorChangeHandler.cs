@@ -58,6 +58,20 @@ namespace osu.Game.Screens.Edit
                 }
                 next.BeatmapInfo.Ruleset = editorBeatmap.BeatmapInfo.Ruleset;
                 var converted = next.BeatmapInfo.Ruleset.CreateInstance().CreateBeatmapConverter(next).Convert();
+                // The legacy carrier represents a multitap as one ordinary circle, so the patcher
+                // cannot detect rhythm changes or restore the correct runtime object type itself.
+                var currentObjects = editorBeatmap.HitObjects.Where(h => h is not IHasBeatmapEvent).ToArray();
+                var restoredObjects = converted.HitObjects.Where(h => h is not IHasBeatmapEvent).ToArray();
+                if (currentObjects.Length != restoredObjects.Length)
+                    throw new InvalidDataException("Native object data does not match the restored beatmap.");
+                for (int i = 0; i < currentObjects.Length; i++)
+                {
+                    if (currentObjects[i].Multitap == null && restoredObjects[i].Multitap == null) continue;
+                    bool selected = editorBeatmap.SelectedHitObjects.Contains(currentObjects[i]);
+                    editorBeatmap.Remove(currentObjects[i]);
+                    editorBeatmap.Add(restoredObjects[i]);
+                    if (selected) editorBeatmap.SelectedHitObjects.Add(restoredObjects[i]);
+                }
                 foreach (var e in converted.HitObjects.Where(h => h is IHasBeatmapEvent))
                     editorBeatmap.Add(e);
                 editorBeatmap.ClampSliderMovement = next.ClampSliderMovement;

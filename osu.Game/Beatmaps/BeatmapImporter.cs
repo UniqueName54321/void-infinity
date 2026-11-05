@@ -234,7 +234,8 @@ namespace osu.Game.Beatmaps
                 beatmap.UpdateLocalScores(realm);
             }
 
-            ProcessBeatmap?.Invoke(model, parameters.Batch ? MetadataLookupScope.LocalCacheFirst : MetadataLookupScope.OnlineFirst);
+            ProcessBeatmap?.Invoke(model, parameters.SkipOnlineMetadataLookup ? MetadataLookupScope.None
+                : parameters.Batch ? MetadataLookupScope.LocalCacheFirst : MetadataLookupScope.OnlineFirst);
         }
 
         private void validateOnlineIds(BeatmapSetInfo beatmapSet, Realm realm)

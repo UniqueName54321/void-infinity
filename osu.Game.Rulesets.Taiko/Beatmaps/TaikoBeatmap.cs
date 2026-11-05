@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -14,7 +14,7 @@ namespace osu.Game.Rulesets.Taiko.Beatmaps
     {
         public override IEnumerable<BeatmapStatistic> GetStatistics()
         {
-            int hits = HitObjects.Count(s => s is Hit);
+            int hits = HitObjects.Sum(s => s is MultitapHit m ? m.Multitap.Count : s is Hit ? 1 : 0);
             int drumRolls = HitObjects.Count(s => s is DrumRoll);
             int swells = HitObjects.Count(s => s is Swell);
             int sum = Math.Max(1, hits + drumRolls);
