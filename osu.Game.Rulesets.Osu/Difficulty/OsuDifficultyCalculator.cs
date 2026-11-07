@@ -23,7 +23,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty
     {
         private const double star_rating_multiplier = 0.0265;
 
-        public override int Version => 20261105;
+        public override int Version => 20261107;
 
         public OsuDifficultyCalculator(IRulesetInfo ruleset, IWorkingBeatmap beatmap)
             : base(ruleset, beatmap)
@@ -168,7 +168,7 @@ namespace osu.Game.Rulesets.Osu.Difficulty
             List<DifficultyHitObject> objects = new List<DifficultyHitObject>();
 
             // The first jump is formed by the first two hitobjects of the map.
-            // If the map has less than two OsuHitObjects, the enumerator will not return anything.
+            // Native slider tracking can also contribute difficulty without a preceding jump.
             var playableObjects = beatmap.HitObjects.Where(h => h is not BeatmapEvent)
                 .SelectMany(h => h is MultitapCircle ? h.NestedHitObjects.ToArray() : new[] { h }).OrderBy(h => h.StartTime).ToArray();
             if (playableObjects.FirstOrDefault() is Slider first && (first.HasMovement || first.Path.ControlPoints.Any(p => p.Velocity != 1)))

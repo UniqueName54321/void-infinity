@@ -2,6 +2,9 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Generic;
+using System.Linq;
+using osu.Framework.Testing;
+using osu.Game.Rulesets.Scoring;
 using NUnit.Framework;
 using osu.Game.Beatmaps;
 using osu.Game.Online.API.Requests.Responses;
@@ -27,20 +30,30 @@ namespace osu.Game.Rulesets.Osu.Tests.Mods
         public void UseLocalAvatar() => Schedule(() => API.LocalUser.Value.AvatarUrl = "Online/avatar-guest");
 
         [Test]
-        public void TestMultitapRelax() => CreateModTest(new ModTestData
+        public void TestMultitapRelax()
         {
-            Mod = new OsuModRelax(), Autoplay = false,
-            CreateBeatmap = () => new Beatmap
+            CreateModTest(new ModTestData
             {
-                HitObjects = { new MultitapCircle { StartTime = 1000, Position = new Vector2(100), Multitap = new MultitapSettings { Count = 8 } } },
-            },
-            ReplayFrames = new List<ReplayFrame>
+                Mod = new OsuModRelax(), Autoplay = false,
+                CreateBeatmap = () => new Beatmap
+                {
+                    HitObjects = { new MultitapCircle { StartTime = 1000, Position = new Vector2(100), Multitap = new MultitapSettings { Count = 8 } } },
+                },
+                ReplayFrames = new List<ReplayFrame>
+                {
+                    new OsuReplayFrame(0, new Vector2(100)),
+                    new OsuReplayFrame(4000, new Vector2(100)),
+                },
+                PassCondition = () => Player.ScoreProcessor.JudgedHits >= 8,
+            });
+            AddUntilStep("eight taps judged", () => Player.ScoreProcessor.JudgedHits >= 8);
+            AddStep("all taps hit", () =>
             {
-                new OsuReplayFrame(0, new Vector2(100)),
-                new OsuReplayFrame(4000, new Vector2(100)),
-            },
-            PassCondition = () => Player.ScoreProcessor.Combo.Value == 8,
-        });
+                var results = Player.ScoreProcessor.HitEvents.Where(e => e.HitObject is MultitapHitCircle).Select(e => e.Result).ToArray();
+                Assert.That(results.Length, Is.EqualTo(8));
+                Assert.That(results, Is.All.EqualTo(HitResult.Great));
+            });
+        }
 
         [Test]
         public void TestRelax() => CreateModTest(new ModTestData

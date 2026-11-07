@@ -5,6 +5,7 @@ using System.Linq;
 using NUnit.Framework;
 using osu.Framework.Testing;
 using osu.Game.Beatmaps;
+using osu.Game.Graphics.Sprites;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
@@ -41,6 +42,9 @@ namespace osu.Game.Tests.Visual.Gameplay
         protected override void AddCheckSteps()
         {
             AddUntilStep("one native group retained", () => Player.ChildrenOfType<DrawableHitObject>().Any(d => d.HitObject is IHasMultitap) != noMultis);
+            if (!noMultis)
+                AddAssert("counter respects visibility mods", () => Player.ChildrenOfType<MultitapCounter>().Any()
+                    && Player.ChildrenOfType<MultitapCounter>().All(c => c.Alpha == (hidden ? 0 : 1)));
             AddUntilStep("all taps judged", () => Player.ScoreProcessor.JudgedHits >= 8);
             AddAssert("no missed taps", () => !Player.ScoreProcessor.HitEvents.Any(e => e.Result == HitResult.Miss));
         }

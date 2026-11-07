@@ -8,6 +8,7 @@ using System.Linq;
 using osu.Framework.Localisation;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects.Types;
+using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Objects.Drawables;
 using osu.Game.Rulesets.Osu.UI;
@@ -86,8 +87,8 @@ namespace osu.Game.Rulesets.Osu.Mods
                 if (time < h.HitObject.StartTime - RELAX_LENIENCY)
                     break;
 
-                // already hit or beyond the hittable end time.
-                if (h.IsHit || (h.HitObject is IHasDuration hasEnd && time > hasEnd.EndTime))
+                // Multitaps retain the final circle's late hit window beyond the group end time.
+                if (h.IsHit || (h.HitObject is IHasDuration hasEnd && h.HitObject is not IHasMultitap && time > hasEnd.EndTime))
                     continue;
 
                 switch (h)

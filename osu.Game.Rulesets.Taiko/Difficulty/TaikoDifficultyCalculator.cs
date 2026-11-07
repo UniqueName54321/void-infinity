@@ -34,7 +34,7 @@ namespace osu.Game.Rulesets.Taiko.Difficulty
         private bool isRelax;
         private bool isConvert;
 
-        public override int Version => 20261105;
+        public override int Version => 20261107;
 
         public TaikoDifficultyCalculator(IRulesetInfo ruleset, IWorkingBeatmap beatmap)
             : base(ruleset, beatmap)

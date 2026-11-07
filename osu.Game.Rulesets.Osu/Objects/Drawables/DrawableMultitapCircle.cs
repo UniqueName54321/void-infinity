@@ -27,7 +27,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             AddRangeInternal(new Drawable[]
             {
                 taps = new Container { RelativeSizeAxes = Axes.Both },
-                remaining = new OsuSpriteText
+                remaining = new MultitapCounter
                 {
                     Anchor = Anchor.TopCentre, Origin = Anchor.BottomCentre,
                     Font = OsuFont.Default.With(size: 20, weight: FontWeight.Bold),

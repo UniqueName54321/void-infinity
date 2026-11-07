@@ -23,7 +23,7 @@ namespace osu.Game.Rulesets.Mania.Objects.Drawables
             AddRangeInternal(new Drawable[]
             {
                 taps = new Container { RelativeSizeAxes = Axes.Both },
-                remaining = new OsuSpriteText { Text = "MULTI", Font = OsuFont.Default.With(size: 14, weight: FontWeight.Bold) },
+                remaining = new MultitapCounter { Text = "MULTI", Font = OsuFont.Default.With(size: 14, weight: FontWeight.Bold) },
             });
         }
 

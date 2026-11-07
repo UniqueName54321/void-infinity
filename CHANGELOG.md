@@ -1,5 +1,12 @@
 # void!infinity Changelog
 
+## v0.1.2.4
+
+- Updated local star calculations to count every multitap note in strain, combo, and difficulty attributes. Standard now samples moving and variable-velocity sliders over time, including tracking effort for first/standalone native sliders. Bumped all four calculator versions so cached estimates are refreshed.
+- Updated mod interactions for the new objects: Relax taps every standard multitap note; autoplay follows groups in all modes; Hidden/Fade In adjust child notes without prematurely hiding entire groups, and multitap counters do not reveal hidden notes. Mirror/Hard Rock propagate to group notes, and taiko Swap/Random/Simplified Rhythm handle the individual hits.
+- Added **No Multis** to every mode's conversion mods. It replaces multitap groups with ordinary streams while preserving timing, hitsounds, columns, positions, and taiko hit types. This affects the playable map without rewriting the saved beatmap.
+- Added native multitap support to **taiko**, **catch**, and **mania**, including editor configuration, saving/loading, separate tap judgements, autoplay, and undo/redo. Catch groups produce repeated fruits; mania groups stay in their authored column; taiko groups retain rim/centre and strong-hit information.
+
 ## v0.1.2.3
 
 - Fixed older local `.vib` beatmaps failing to load and appearing to contain 0 hitobjects after the multitap update. Missing or null optional extension collections now retain empty defaults, preserving the map's existing hitobjects, slider extensions, and events. Existing files do not need to be rewritten or reimported.

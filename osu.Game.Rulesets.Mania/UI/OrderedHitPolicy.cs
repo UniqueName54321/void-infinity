@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Game.Rulesets.Mania.Objects.Drawables;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Drawables;
@@ -57,7 +56,22 @@ namespace osu.Game.Rulesets.Mania.UI
         private IEnumerable<DrawableHitObject> playableObjects() => hitObjectContainer.AliveObjects
             .SelectMany(h => h.HitObject is IHasMultitap ? h.NestedHitObjects.ToArray() : new[] { h }).OrderBy(h => h.HitObject.StartTime);
 
-        private IEnumerable<DrawableHitObject> enumerateHitObjectsUpTo(double targetTime) => playableObjects()
-            .Where(h => h.HitObject.GetEndTime() < targetTime);
+        private IEnumerable<DrawableHitObject> enumerateHitObjectsUpTo(double targetTime)
+        {
+            foreach (var obj in playableObjects())
+            {
+                // Preserve hold-note locking: an active hold still stops this traversal.
+                if (obj.HitObject.GetEndTime() >= targetTime)
+                    yield break;
+
+                yield return obj;
+                foreach (var nested in obj.NestedHitObjects)
+                {
+                    if (nested.HitObject.GetEndTime() >= targetTime)
+                        break;
+                    yield return nested;
+                }
+            }
+        }
     }
 }
